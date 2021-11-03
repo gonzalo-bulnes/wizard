@@ -11,6 +11,19 @@ SEPARATOR = "separator"
 class PushButtonState(QWidget):
     """The state of a button for styling purposes.
 
+    There should be no need for you to use this class directly.
+
+    This class described the behavior of a button. A disabled button doesn't
+    react to user interaction. An enabled button can be in a resting state,
+    be subject to hover, focus, or be pressed.
+
+    These states follow the Material Design 2 guidelines.
+    See https://material.io/components/buttons.html
+
+
+    Paste the following state chart in https://mermaid.live for
+    a visual representation of the behavior implemented by this class!
+
     stateDiagram-v2
       [*] --> enabled
       enabled --> disabled: disable
@@ -49,6 +62,13 @@ class PushButtonState(QWidget):
 
     def __init__(self) -> None:
         super().__init__()
+
+        # Declare the state chart described in the docstring.
+        # See https://doc.qt.io/qt-5/statemachine-api.html
+        #
+        # This is a very declarative exercise.
+        # The state names are part of the API of this class,
+        # as well as the event handling functions.
         self._machine = QStateMachine()
 
         self.enabled = QState()
@@ -91,6 +111,9 @@ class PushButtonState(QWidget):
     def disable(self) -> None:
         self._disableActionTriggered.emit()
 
+    def enbable(self) -> None:
+        self.enableActionTriggered.emit()
+
     def enable(self) -> None:
         self._enableActionTriggered.emit()
 
@@ -112,13 +135,35 @@ class PushButtonState(QWidget):
     def release(self) -> None:
         self._mouseReleaseEventTriggered.emit()
 
-Elevation = NewType("Elevation", int)
-
 class PushButton(QPushButton):
-    """A QPushButton with custom styles."""
+    """
+    A QPushButton with custom styles.
 
+    While this widget looks and behaves according to the Material Design 2 guidelines,
+    the custom behavior was implemented to avoid obstructing the QPushButton API.
+    This means all accessibility features of a QPushButton should be available.
+
+    For example, this button can be focused using your usual operating system
+    keyboard shortcuts (typically by using TAB or arrow keys), and activated
+    accordingly (typically by pressing the Space bar).
+
+    This widget also emits all the events that a regular QPushButton emits.
+
+
+    """
+
+    # You shouldn't need to refer to these states outside this class.
+    State = NewType("State", str)
+    StateEnabled = State("enabled")
+    StateHover = State("hover")
+    StateFocus = State("focus")
+    StatePressed = State("pressed")
+    StateDisabled = State("disabled")
+
+    # You shouldn't need to refer to these elevations outside this class.
     # See Material Design 2 diagram of default elevation values.
     # https://material.io/design/environment/elevation.html#default-elevations
+    Elevation = NewType("Elevation", int)
     ElevationNone = Elevation(0)
     ElevationLow = Elevation(2)
     ElevationMedium = Elevation(4)
@@ -128,12 +173,14 @@ class PushButton(QPushButton):
         super().__init__(parent)
 
         self.state = PushButtonState()
+        self.debug = False
 
         self.styles = f"""
             * {{
                 border: none;
                 border-radius: 6px;
                 font: 500 18px 'Monsterrat';
+                margin-bottom: 1em;
                 outline: none;
                 padding: .6em 1em;
             }}
@@ -165,50 +212,81 @@ class PushButton(QPushButton):
         """
         self.setStyleSheet(self.styles)
 
-        self.state.resting.entered.connect(lambda: self.setProperty("class", "enabled"))
-        self.state.resting.entered.connect(lambda: self.setText("ENABLED"))
-        self.state.resting.entered.connect(lambda: self.setElevation(self.ElevationLow))
-        self.state.resting.entered.connect(lambda: self.setStyleSheet(self.styles))
-
-        self.state.disabled.entered.connect(lambda: self.setProperty("class", "disabled"))
-        self.state.disabled.entered.connect(lambda: self.setText("DISABLED"))
-        self.state.disabled.entered.connect(lambda: self.setElevation(self.ElevationNone))
-        self.state.disabled.entered.connect(lambda: self.setStyleSheet(self.styles))
-
-        self.state.hoverFromResting.entered.connect(lambda: self.setProperty("class", "hover"))
-        self.state.hoverFromResting.entered.connect(lambda: self.setText("HOVER"))
-        self.state.hoverFromResting.entered.connect(lambda: self.setElevation(self.ElevationMedium))
-        self.state.hoverFromResting.entered.connect(lambda: self.setStyleSheet(self.styles))
-
-        self.state.hoverFromFocusFromResting.entered.connect(lambda: self.setProperty("class", "hover"))
-        self.state.hoverFromFocusFromResting.entered.connect(lambda: self.setText("HOVER"))
-        self.state.hoverFromFocusFromResting.entered.connect(lambda: self.setElevation(self.ElevationMedium))
-        self.state.hoverFromFocusFromResting.entered.connect(lambda: self.setStyleSheet(self.styles))
-
-        self.state.focusFromResting.entered.connect(lambda: self.setProperty("class", "focus"))
-        self.state.focusFromResting.entered.connect(lambda: self.setText("FOCUSED"))
-        self.state.focusFromResting.entered.connect(lambda: self.setElevation(self.ElevationLow))
-        self.state.focusFromResting.entered.connect(lambda: self.setStyleSheet(self.styles))
-
-        self.state.pressedFromHoverFromResting.entered.connect(lambda: self.setProperty("class", "pressed"))
-        self.state.pressedFromHoverFromResting.entered.connect(lambda: self.setText("PRESSED"))
-        self.state.pressedFromHoverFromResting.entered.connect(lambda: self.setElevation(self.ElevationHigh))
-        self.state.pressedFromHoverFromResting.entered.connect(lambda: self.setStyleSheet(self.styles))
-
-        self.state.pressedFromFocusFromResting.entered.connect(lambda: self.setProperty("class", "pressed"))
-        self.state.pressedFromFocusFromResting.entered.connect(lambda: self.setText("PRESSED"))
-        self.state.pressedFromFocusFromResting.entered.connect(lambda: self.setElevation(self.ElevationHigh))
-        self.state.pressedFromFocusFromResting.entered.connect(lambda: self.setStyleSheet(self.styles))
-
-        self.state.pressedFromHoverFromFocusFromResting.entered.connect(lambda: self.setProperty("class", "pressed"))
-        self.state.pressedFromHoverFromFocusFromResting.entered.connect(lambda: self.setText("PRESSED"))
-        self.state.pressedFromHoverFromFocusFromResting.entered.connect(lambda: self.setElevation(self.ElevationHigh))
-        self.state.pressedFromHoverFromFocusFromResting.entered.connect(lambda: self.setStyleSheet(self.styles))
+        # Connect the style updates to the changes of internal state.
+        self.state.resting.entered.connect(lambda: self.setStyles(self.StateEnabled))
+        self.state.disabled.entered.connect(lambda: self.setStyles(self.StateDisabled))
+        self.state.hoverFromResting.entered.connect(lambda: self.setStyles(self.StateHover))
+        self.state.hoverFromFocusFromResting.entered.connect(lambda: self.setStyles(self.StateHover))
+        self.state.focusFromResting.entered.connect(lambda: self.setStyles(self.StateFocus))
+        self.state.pressedFromHoverFromResting.entered.connect(lambda: self.setStyles(self.StatePressed))
+        self.state.pressedFromFocusFromResting.entered.connect(lambda: self.setStyles(self.StatePressed))
+        self.state.pressedFromHoverFromFocusFromResting.entered.connect(lambda: self.setStyles(self.StatePressed))
 
     def disable(self) -> None:
+        """Disable the button."""
         self.state.disable()
+        super().setDisabled(True)
+
+    def enable(self) -> None:
+        """Enable the button."""
+        self.state.enable()
+        super().setDisabled(False)
+
+    def setStyles(self, state: State) -> None:
+        """Set styles corresponding to a given button state.
+
+        These visual effects follows the Material Design 2 guidelines for buttons.
+        See https://material.io/components/buttons.html#contained-button
+
+        The method contains some 'magic values' that are referred to in
+        the widget's stylesheet. None of them needs to be used or modified
+        by end-users.
+        """
+        if state is self.StateEnabled:
+            self.setProperty("class", "enabled")
+            self.setElevation(self.ElevationLow)
+            self.setCursor(QCursor(Qt.PointingHandCursor))
+            self.setStyleSheet(self.styles)
+            if self.debug:
+              self.setText("ENABLED")
+        elif state is self.StateHover:
+            self.setProperty("class", "hover")
+            self.setElevation(self.ElevationMedium)
+            self.setStyleSheet(self.styles)
+            if self.debug:
+                self.setText("HOVER")
+        elif state is self.StateFocus:
+            self.setProperty("class", "focus")
+            self.setElevation(self.ElevationLow)
+            self.setStyleSheet(self.styles)
+            if self.debug:
+                self.setText("FOCUSED")
+        elif state is self.StatePressed:
+            self.setProperty("class", "pressed")
+            self.setElevation(self.ElevationHigh)
+            self.setStyleSheet(self.styles)
+            if self.debug:
+                self.setText("PRESSED")
+        else:
+            self.setProperty("class", "disabled")
+            self.setElevation(self.ElevationNone)
+            self.setCursor(QCursor(Qt.ArrowCursor))
+            self.setStyleSheet(self.styles)
+            if self.debug:
+                self.setText("DISABLED")
 
     def setElevation(self, value: Elevation) -> None:
+        """
+        Set a drop shadow to suggest widget elevation.
+
+        This visual effect follows the Material Design 2 guidelines for buttons.
+        See https://material.io/components/buttons.html#contained-button
+
+        The method contains some 'magic values' that control the appearance
+        of the shadow, based on the requested elevation. None of those needs
+        to be used or modified by end-users, not even the elevation constants
+        that are provided by this class.
+        """
         shadow = QGraphicsDropShadowEffect(self)
         shadow.setOffset(0, 1.5*value)
         shadow.setBlurRadius(4*value)
@@ -256,21 +334,30 @@ class Main(QMainWindow):
 
     def setupUI(self):
         self.setWindowTitle("Widgets")
-        #self.resize(800, 600)
         self.centralWidget = QWidget()
         self.setCentralWidget(self.centralWidget)
+        self.statusBar()
 
         appActions = self.__createAppActions()
         _addActions(self, appActions)
 
         layout = QHBoxLayout()
-        label = QLabel("Hello, world!")
+        label = QLabel("Demo")
         layout.addWidget(label)
-        b = QPushButton("Disable")
-        layout.addWidget(b)
+
+        # This is our button!
         button = PushButton()
-        button.clicked.connect(lambda: print("clicked"))
-        b.clicked.connect(lambda: button.disable())
+        button.setText("SIGN IN")
+        button.clicked.connect(lambda: self.statusBar().showMessage("Clicked!", 500))
+
+        # Support buttons.
+        disable = QPushButton("Disable button")
+        layout.addWidget(disable)
+        enable = QPushButton("Enable button")
+        layout.addWidget(enable)
+        disable.clicked.connect(lambda: button.disable())
+        enable.clicked.connect(lambda: button.enable())
+
         layout.addWidget(button)
         self.centralWidget.setLayout(layout)
 
