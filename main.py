@@ -1,4 +1,5 @@
 import sys
+from typing import NewType
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -111,8 +112,18 @@ class PushButtonState(QWidget):
     def release(self) -> None:
         self._mouseReleaseEventTriggered.emit()
 
+Elevation = NewType("Elevation", int)
+
 class PushButton(QPushButton):
     """A QPushButton with custom styles."""
+
+    # See Material Design 2 diagram of default elevation values.
+    # https://material.io/design/environment/elevation.html#default-elevations
+    ElevationNone = Elevation(0)
+    ElevationLow = Elevation(2)
+    ElevationMedium = Elevation(4)
+    ElevationHigh = Elevation(8)
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -156,51 +167,51 @@ class PushButton(QPushButton):
 
         self.state.resting.entered.connect(lambda: self.setProperty("class", "enabled"))
         self.state.resting.entered.connect(lambda: self.setText("ENABLED"))
-        self.state.resting.entered.connect(lambda: self.setElevation(2))
+        self.state.resting.entered.connect(lambda: self.setElevation(self.ElevationLow))
         self.state.resting.entered.connect(lambda: self.setStyleSheet(self.styles))
 
         self.state.disabled.entered.connect(lambda: self.setProperty("class", "disabled"))
         self.state.disabled.entered.connect(lambda: self.setText("DISABLED"))
-        self.state.disabled.entered.connect(lambda: self.setElevation(0))
+        self.state.disabled.entered.connect(lambda: self.setElevation(self.ElevationNone))
         self.state.disabled.entered.connect(lambda: self.setStyleSheet(self.styles))
 
         self.state.hoverFromResting.entered.connect(lambda: self.setProperty("class", "hover"))
         self.state.hoverFromResting.entered.connect(lambda: self.setText("HOVER"))
-        self.state.hoverFromResting.entered.connect(lambda: self.setElevation(4))
+        self.state.hoverFromResting.entered.connect(lambda: self.setElevation(self.ElevationMedium))
         self.state.hoverFromResting.entered.connect(lambda: self.setStyleSheet(self.styles))
 
         self.state.hoverFromFocusFromResting.entered.connect(lambda: self.setProperty("class", "hover"))
         self.state.hoverFromFocusFromResting.entered.connect(lambda: self.setText("HOVER"))
-        self.state.hoverFromFocusFromResting.entered.connect(lambda: self.setElevation(4))
+        self.state.hoverFromFocusFromResting.entered.connect(lambda: self.setElevation(self.ElevationMedium))
         self.state.hoverFromFocusFromResting.entered.connect(lambda: self.setStyleSheet(self.styles))
 
         self.state.focusFromResting.entered.connect(lambda: self.setProperty("class", "focus"))
         self.state.focusFromResting.entered.connect(lambda: self.setText("FOCUSED"))
-        self.state.focusFromResting.entered.connect(lambda: self.setElevation(2))
+        self.state.focusFromResting.entered.connect(lambda: self.setElevation(self.ElevationLow))
         self.state.focusFromResting.entered.connect(lambda: self.setStyleSheet(self.styles))
 
         self.state.pressedFromHoverFromResting.entered.connect(lambda: self.setProperty("class", "pressed"))
         self.state.pressedFromHoverFromResting.entered.connect(lambda: self.setText("PRESSED"))
-        self.state.pressedFromHoverFromResting.entered.connect(lambda: self.setElevation(8))
+        self.state.pressedFromHoverFromResting.entered.connect(lambda: self.setElevation(self.ElevationHigh))
         self.state.pressedFromHoverFromResting.entered.connect(lambda: self.setStyleSheet(self.styles))
 
         self.state.pressedFromFocusFromResting.entered.connect(lambda: self.setProperty("class", "pressed"))
         self.state.pressedFromFocusFromResting.entered.connect(lambda: self.setText("PRESSED"))
-        self.state.pressedFromFocusFromResting.entered.connect(lambda: self.setElevation(8))
+        self.state.pressedFromFocusFromResting.entered.connect(lambda: self.setElevation(self.ElevationHigh))
         self.state.pressedFromFocusFromResting.entered.connect(lambda: self.setStyleSheet(self.styles))
 
         self.state.pressedFromHoverFromFocusFromResting.entered.connect(lambda: self.setProperty("class", "pressed"))
         self.state.pressedFromHoverFromFocusFromResting.entered.connect(lambda: self.setText("PRESSED"))
-        self.state.pressedFromHoverFromFocusFromResting.entered.connect(lambda: self.setElevation(8))
+        self.state.pressedFromHoverFromFocusFromResting.entered.connect(lambda: self.setElevation(self.ElevationHigh))
         self.state.pressedFromHoverFromFocusFromResting.entered.connect(lambda: self.setStyleSheet(self.styles))
 
     def disable(self) -> None:
         self.state.disable()
 
-    def setElevation(self, elevation: int) -> None:
+    def setElevation(self, value: Elevation) -> None:
         shadow = QGraphicsDropShadowEffect(self)
-        shadow.setOffset(0, 1.5*elevation)
-        shadow.setBlurRadius(4*elevation)
+        shadow.setOffset(0, 1.5*value)
+        shadow.setBlurRadius(4*value)
         shadow.setColor(QColor("#44000000"))
         self.setGraphicsEffect(shadow)
         self.update()
