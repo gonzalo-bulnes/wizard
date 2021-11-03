@@ -11,84 +11,87 @@ class PushButtonState(QWidget):
     """The state of a button for styling purposes.
 
     stateDiagram-v2
-    [*] --> Enabled
-    Enabled --> Disabled: disable
-    Disabled --> Enabled: enable
+      [*] --> enabled
+      enabled --> disabled: disable
+      disabled --> enabled: enable
 
-    state Enabled {
-        [*] --> NotHover
-        NotHover --> Hover: HoverEnter
-        Hover --> NotHover: HoverLeave
-        Hover --> Pressed: MouseButtonDown
-        --
-        [*] --> NotFocus
-        NotFocus --> Focus: FocusIn
-        Focus --> NotFocus: FocusOut
-        Focus --> Pressed: KeyPress
-        --
-        [*] --> NotPressed
-        Pressed --> NotPressed
-    }
+      state enabled {
+        resting --> hoverFromResting: HoverIn
+        hoverFromResting --> resting: HoverOut
+
+        resting --> focusFromResting: FocusIn
+        focusFromResting --> resting: FocusOut
+
+        hoverFromResting --> pressedFromHoverFromResting: MousePress
+        pressedFromHoverFromResting --> hoverFromResting: MouseRelease
+
+        focusFromResting --> pressedFromFocusFromResting: MousePress
+        pressedFromFocusFromResting --> focusFromResting: MouseRelease
+
+        focusFromResting --> hoverFromFocusFromResting: FocusOut
+        hoverFromFocusFromResting --> focusFromResting: FocusIn
+
+        hoverFromFocusFromResting --> pressedFromHoverFromFocusFromResting: MousePress
+        pressedFromHoverFromFocusFromResting --> hoverFromFocusFromResting: MouseRelease
+      }
     """
 
     _disableActionTriggered = pyqtSignal()
     _enableActionTriggered = pyqtSignal()
-    _hoverActionTriggered = pyqtSignal()
-    _toggleActionTriggered = pyqtSignal()
 
     _hoverInEventTriggered = pyqtSignal()
     _hoverOutEventTriggered = pyqtSignal()
-    _focusEventTriggered = pyqtSignal()
-    _blurEventTriggered = pyqtSignal()
+    _focusInEventTriggered = pyqtSignal()
+    _focusOutEventTriggered = pyqtSignal()
     _mousePressEventTriggered = pyqtSignal()
     _mouseReleaseEventTriggered = pyqtSignal()
 
     def __init__(self) -> None:
         super().__init__()
-        self.machine = QStateMachine()
+        self._machine = QStateMachine()
 
-        self.enabled = QState(QState.ParallelStates)
+        self.enabled = QState()
         self.disabled = QState()
         self.enabled.addTransition(self._disableActionTriggered, self.disabled)
-        self.enabled.addTransition(self._toggleActionTriggered, self.disabled)
         self.disabled.addTransition(self._enableActionTriggered, self.enabled)
-        self.disabled.addTransition(self._toggleActionTriggered, self.enabled)
 
-        self.machine.addState(self.enabled)
-        self.machine.addState(self.disabled)
-        self.machine.setInitialState(self.enabled)
+        self._machine.addState(self.enabled)
+        self._machine.addState(self.disabled)
+        self._machine.setInitialState(self.enabled)
 
-        self.hover = QState(self.enabled)
-        self.hoverOn = QState(self.hover)
-        self.hoverOff = QState(self.hover)
-        self.hover.setInitialState(self.hoverOff)
-        self.hoverOn.addTransition(self._hoverOutEventTriggered, self.hoverOff)
-        self.hoverOff.addTransition(self._hoverInEventTriggered, self.hoverOn)
+        self.resting = QState(self.enabled)
+        self.enabled.setInitialState(self.resting)
 
-        self.focus = QState(self.enabled)
-        self.focusOn = QState(self.focus)
-        self.focusOff = QState(self.focus)
-        self.focus.setInitialState(self.focusOff)
-        self.focusOn.addTransition(self._blurEventTriggered, self.focusOff)
-        self.focusOff.addTransition(self._focusEventTriggered, self.focusOn)
-        
-        self.pressed = QState(self.enabled)
-        self.pressedOn = QState(self.pressed)
-        self.pressedOff = QState(self.pressed)
-        self.pressed.setInitialState(self.pressedOff)
-        self.pressedOn.addTransition(self._mouseReleaseEventTriggered, self.pressedOff)
-        self.pressedOff.addTransition(self._mousePressEventTriggered, self.pressedOn)
+        self.hoverFromResting = QState(self.enabled)
+        self.pressedFromHoverFromResting = QState(self.enabled)
+        self.focusFromResting = QState(self.enabled)
+        self.pressedFromFocusFromResting = QState(self.enabled)
+        self.hoverFromFocusFromResting = QState(self.enabled)
+        self.pressedFromHoverFromFocusFromResting = QState(self.enabled)
 
-        self.machine.start()
+        self.resting.addTransition(self._hoverInEventTriggered, self.hoverFromResting)
+        self.hoverFromResting.addTransition(self._hoverOutEventTriggered, self.resting)
+        self.hoverFromResting.addTransition(self._mousePressEventTriggered, self.pressedFromHoverFromResting)
+        self.pressedFromHoverFromResting.addTransition(self._mouseReleaseEventTriggered, self.hoverFromResting)
+
+        self.resting.addTransition(self._focusInEventTriggered, self.focusFromResting)
+        self.focusFromResting.addTransition(self._focusOutEventTriggered, self.resting)
+        self.focusFromResting.addTransition(self._mousePressEventTriggered, self.pressedFromFocusFromResting)
+        self.pressedFromFocusFromResting.addTransition(self._mouseReleaseEventTriggered, self.focusFromResting)
+
+        self.focusFromResting.addTransition(self._hoverInEventTriggered, self.hoverFromFocusFromResting)
+        self.hoverFromFocusFromResting.addTransition(self._hoverOutEventTriggered, self.focusFromResting)
+
+        self.hoverFromFocusFromResting.addTransition(self._mousePressEventTriggered, self.pressedFromHoverFromFocusFromResting)
+        self.pressedFromHoverFromFocusFromResting.addTransition(self._mouseReleaseEventTriggered, self.hoverFromFocusFromResting) 
+
+        self._machine.start()
 
     def disable(self) -> None:
         self._disableActionTriggered.emit()
 
     def enable(self) -> None:
         self._enableActionTriggered.emit()
-
-    def toggle(self) -> None:
-        self._toggleActionTriggered.emit()
 
     def hoverIn(self) -> None:
         self._hoverInEventTriggered.emit()
@@ -97,10 +100,10 @@ class PushButtonState(QWidget):
         self._hoverOutEventTriggered.emit()
 
     def focusIn(self) -> None:
-        self._focusEventTriggered.emit()
+        self._focusInEventTriggered.emit()
 
-    def blur(self) -> None:
-        self._blurEventTriggered.emit()
+    def focusOut(self) -> None:
+        self._focusOutEventTriggered.emit()
 
     def press(self) -> None:
         self._mousePressEventTriggered.emit()
@@ -118,10 +121,10 @@ class PushButton(QPushButton):
         self.styles = f"""
             * {{
                 border: none;
-                border-radius: 4px;
+                border-radius: 6px;
                 font: 500 18px 'Monsterrat';
                 outline: none;
-                padding: .5em 1em;
+                padding: .6em 1em;
             }}
 
             [state=enabled] {{
@@ -151,73 +154,85 @@ class PushButton(QPushButton):
         """
         self.setStyleSheet(self.styles)
 
-        self.state.enabled.entered.connect(lambda: self.setProperty("state", "enabled"))
-        self.state.enabled.entered.connect(lambda: self.setText("ENABLED"))
-        self.state.enabled.entered.connect(lambda: self.setElevation(2))
-        self.state.enabled.entered.connect(lambda: self.setStyleSheet(self.styles))
+        self.state.resting.entered.connect(lambda: self.setProperty("state", "enabled"))
+        self.state.resting.entered.connect(lambda: self.setText("ENABLED"))
+        self.state.resting.entered.connect(lambda: self.setElevation(2))
+        self.state.resting.entered.connect(lambda: self.setStyleSheet(self.styles))
 
         self.state.disabled.entered.connect(lambda: self.setProperty("state", "disabled"))
         self.state.disabled.entered.connect(lambda: self.setText("DISABLED"))
         self.state.disabled.entered.connect(lambda: self.setElevation(0))
         self.state.disabled.entered.connect(lambda: self.setStyleSheet(self.styles))
 
-        self.state.hoverOn.entered.connect(lambda: self.setProperty("state", "hover"))
-        self.state.hoverOn.entered.connect(lambda: self.setText("HOVER"))
-        self.state.hoverOn.entered.connect(lambda: self.setElevation(4))
-        self.state.hoverOn.entered.connect(lambda: self.setStyleSheet(self.styles))
+        self.state.hoverFromResting.entered.connect(lambda: self.setProperty("state", "hover"))
+        self.state.hoverFromResting.entered.connect(lambda: self.setText("HOVER"))
+        self.state.hoverFromResting.entered.connect(lambda: self.setElevation(4))
+        self.state.hoverFromResting.entered.connect(lambda: self.setStyleSheet(self.styles))
 
-        self.state.focusOn.entered.connect(lambda: self.setProperty("state", "focus"))
-        self.state.focusOn.entered.connect(lambda: self.setText("FOCUS"))
-        self.state.focusOn.entered.connect(lambda: self.setElevation(2))
-        self.state.focusOn.entered.connect(lambda: self.setStyleSheet(self.styles))
+        self.state.hoverFromFocusFromResting.entered.connect(lambda: self.setProperty("state", "hover"))
+        self.state.hoverFromFocusFromResting.entered.connect(lambda: self.setText("HOVER"))
+        self.state.hoverFromFocusFromResting.entered.connect(lambda: self.setElevation(4))
+        self.state.hoverFromFocusFromResting.entered.connect(lambda: self.setStyleSheet(self.styles))
 
-        self.state.pressedOn.entered.connect(lambda: self.setProperty("state", "pressed"))
-        self.state.pressedOn.entered.connect(lambda: self.setText("PRESSED"))
-        self.state.pressedOn.entered.connect(lambda: self.setElevation(8))
-        self.state.pressedOn.entered.connect(lambda: self.setStyleSheet(self.styles))
+        self.state.focusFromResting.entered.connect(lambda: self.setProperty("state", "focus"))
+        self.state.focusFromResting.entered.connect(lambda: self.setText("FOCUSED"))
+        self.state.focusFromResting.entered.connect(lambda: self.setElevation(2))
+        self.state.focusFromResting.entered.connect(lambda: self.setStyleSheet(self.styles))
 
-        #self.clicked.connect(self.state.toggle)
-        self.clicked.connect(self.status)
+        self.state.pressedFromHoverFromResting.entered.connect(lambda: self.setProperty("state", "pressed"))
+        self.state.pressedFromHoverFromResting.entered.connect(lambda: self.setText("PRESSED"))
+        self.state.pressedFromHoverFromResting.entered.connect(lambda: self.setElevation(8))
+        self.state.pressedFromHoverFromResting.entered.connect(lambda: self.setStyleSheet(self.styles))
+
+        self.state.pressedFromFocusFromResting.entered.connect(lambda: self.setProperty("state", "pressed"))
+        self.state.pressedFromFocusFromResting.entered.connect(lambda: self.setText("PRESSED"))
+        self.state.pressedFromFocusFromResting.entered.connect(lambda: self.setElevation(8))
+        self.state.pressedFromFocusFromResting.entered.connect(lambda: self.setStyleSheet(self.styles))
+
+        self.state.pressedFromHoverFromFocusFromResting.entered.connect(lambda: self.setProperty("state", "pressed"))
+        self.state.pressedFromHoverFromFocusFromResting.entered.connect(lambda: self.setText("PRESSED"))
+        self.state.pressedFromHoverFromFocusFromResting.entered.connect(lambda: self.setElevation(8))
+        self.state.pressedFromHoverFromFocusFromResting.entered.connect(lambda: self.setStyleSheet(self.styles))
 
     def setElevation(self, elevation: int) -> None:
         shadow = QGraphicsDropShadowEffect(self)
-        shadow.setOffset(0, 2*elevation)
-        shadow.setBlurRadius(5*elevation)
+        shadow.setOffset(0, 1.5*elevation)
+        shadow.setBlurRadius(4*elevation)
         shadow.setColor(QColor("#44000000"))
         self.setGraphicsEffect(shadow)
         self.update()
         
-    def status(self):
-        #print(self.property("state"))
-        pass
-
     def event(self, e: QEvent) -> bool:
         if type(e) is QHoverEvent:
             if e.oldPos() == QPoint(-1, -1):
-                self.setProperty("state", "hover")
                 self.state.hoverIn()
-                self.setStyleSheet(self.styles)
             if e.pos() == QPoint(-1, -1):
-                self.setProperty("state", "enabled")
                 self.state.hoverOut()
-                self.setStyleSheet(self.styles)
         if type(e) is QFocusEvent:
             if e.gotFocus():
-                self.setProperty("state", "focus")
                 self.state.focusIn()
-                self.setStyleSheet(self.styles)
             if e.lostFocus():
-                self.setProperty("state", "enabled")
-                self.state.blur()
-                self.setStyleSheet(self.styles)
+                self.state.focusOut()
         return super().event(e)
 
+    def keyPressEvent(self, e: QEvent) -> bool:
+        if e.key() == Qt.Key_Space:
+            self.state.press()
+        return super().keyPressEvent(e)
+
+    def keyReleaseEvent(self, e: QEvent) -> bool:
+        if e.key() == Qt.Key_Space:
+            self.state.release()
+        return super().keyReleaseEvent(e)
+
     def mousePressEvent(self, e: QEvent) -> bool:
-        self.setProperty("state", "pressed")
-        self.state.press()
-        self.setStyleSheet(self.styles)
+        if e.button() == Qt.LeftButton:
+            self.state.press()
         return super().mousePressEvent(e)
 
+    def mouseReleaseEvent(self, e: QEvent) -> bool:
+        self.state.release()
+        return super().mouseReleaseEvent(e)
 
 class Main(QMainWindow):
     """The application main window."""
@@ -227,7 +242,7 @@ class Main(QMainWindow):
 
     def setupUI(self):
         self.setWindowTitle("Widgets")
-        self.resize(800, 600)
+        #self.resize(800, 600)
         self.centralWidget = QWidget()
         self.setCentralWidget(self.centralWidget)
 
@@ -236,10 +251,12 @@ class Main(QMainWindow):
 
         layout = QHBoxLayout()
         b = QPushButton("OK")
+        b.clicked.connect(lambda: print("b clicked"))
         layout.addWidget(b)
         label = QLabel("Hello, world!")
         layout.addWidget(label)
         button = PushButton()
+        button.clicked.connect(lambda: print("clicked"))
         layout.addWidget(button)
         self.centralWidget.setLayout(layout)
 
