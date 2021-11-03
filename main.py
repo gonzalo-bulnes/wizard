@@ -60,8 +60,10 @@ class PushButtonState(QWidget):
     _mousePressEventTriggered = pyqtSignal()
     _mouseReleaseEventTriggered = pyqtSignal()
 
-    def __init__(self) -> None:
+    def __init__(self, button) -> None:
         super().__init__()
+
+        self.button = button
 
         # Declare the state chart described in the docstring.
         # See https://doc.qt.io/qt-5/statemachine-api.html
@@ -90,8 +92,9 @@ class PushButtonState(QWidget):
         self.hoverFromFocusFromResting = QState(self.enabled)
         self.pressedFromHoverFromFocusFromResting = QState(self.enabled)
 
-        self.resting.addTransition(self._hoverInEventTriggered, self.hoverFromResting)
-        self.hoverFromResting.addTransition(self._hoverOutEventTriggered, self.resting)
+        QEventTransition(self.button, QEvent.HoverEnter, self.resting).setTargetState(self.hoverFromResting)
+        QEventTransition(self.button, QEvent.HoverLeave, self.hoverFromResting).setTargetState(self.resting)
+
         self.hoverFromResting.addTransition(self._mousePressEventTriggered, self.pressedFromHoverFromResting)
         self.pressedFromHoverFromResting.addTransition(self._mouseReleaseEventTriggered, self.hoverFromResting)
 
@@ -100,8 +103,8 @@ class PushButtonState(QWidget):
         self.focusFromResting.addTransition(self._mousePressEventTriggered, self.pressedFromFocusFromResting)
         self.pressedFromFocusFromResting.addTransition(self._mouseReleaseEventTriggered, self.focusFromResting)
 
-        self.focusFromResting.addTransition(self._hoverInEventTriggered, self.hoverFromFocusFromResting)
-        self.hoverFromFocusFromResting.addTransition(self._hoverOutEventTriggered, self.focusFromResting)
+        QEventTransition(self.button, QEvent.HoverEnter, self.focusFromResting).setTargetState(self.hoverFromFocusFromResting)
+        QEventTransition(self.button, QEvent.HoverLeave, self.hoverFromFocusFromResting).setTargetState(self.focusFromResting)
 
         self.hoverFromFocusFromResting.addTransition(self._mousePressEventTriggered, self.pressedFromHoverFromFocusFromResting)
         self.pressedFromHoverFromFocusFromResting.addTransition(self._mouseReleaseEventTriggered, self.hoverFromFocusFromResting) 
@@ -117,12 +120,6 @@ class PushButtonState(QWidget):
     def enable(self) -> None:
         self._enableActionTriggered.emit()
 
-    def hoverIn(self) -> None:
-        self._hoverInEventTriggered.emit()
-
-    def hoverOut(self) -> None:
-        self._hoverOutEventTriggered.emit()
-
     def focusIn(self) -> None:
         self._focusInEventTriggered.emit()
 
@@ -134,6 +131,9 @@ class PushButtonState(QWidget):
 
     def release(self) -> None:
         self._mouseReleaseEventTriggered.emit()
+
+    def postEvent(self, e: QEvent) -> None:
+        self._machine.postEvent(QEvent(e))
 
 class PushButton(QPushButton):
     """
@@ -172,7 +172,7 @@ class PushButton(QPushButton):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.state = PushButtonState()
+        self.state = PushButtonState(self)
         self.debug = False
 
         self.styles = f"""
@@ -297,9 +297,9 @@ class PushButton(QPushButton):
     def event(self, e: QEvent) -> bool:
         if type(e) is QHoverEvent:
             if e.oldPos() == QPoint(-1, -1):
-                self.state.hoverIn()
+                self.state.postEvent(e)
             if e.pos() == QPoint(-1, -1):
-                self.state.hoverOut()
+                self.state.postEvent(e)
         if type(e) is QFocusEvent:
             if e.gotFocus():
                 self.state.focusIn()
