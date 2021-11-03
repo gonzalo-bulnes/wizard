@@ -224,7 +224,7 @@ class PushButton(QPushButton):
         self.state.enable()
         super().setDisabled(False)
 
-    def setDebug(debug: bool) -> None:
+    def setDebug(self, debug: bool) -> None:
         """Set debug to replace the button text by its current state."""
         self.debug = debug
 
@@ -303,23 +303,23 @@ class PushButton(QPushButton):
                 self.state.postEvent(e)
         return super().event(e)
 
-    def keyPressEvent(self, e: QEvent) -> bool:
+    def keyPressEvent(self, e: QKeyEvent) -> None:
         if e.key() == Qt.Key_Space:
             self.state.postEvent(e)
             self.state.press()  # Should not necessary. Bug workaround.
         return super().keyPressEvent(e)
 
-    def keyReleaseEvent(self, e: QEvent) -> bool:
+    def keyReleaseEvent(self, e: QKeyEvent) -> None:
         if e.key() == Qt.Key_Space:
             self.state.postEvent(e)
         return super().keyReleaseEvent(e)
 
-    def mousePressEvent(self, e: QEvent) -> bool:
+    def mousePressEvent(self, e: QMouseEvent) -> None:
         if e.button() == Qt.LeftButton:
             self.state.postEvent(e)
         return super().mousePressEvent(e)
 
-    def mouseReleaseEvent(self, e: QEvent) -> bool:
+    def mouseReleaseEvent(self, e: QMouseEvent) -> None:
         self.state.postEvent(e)
         return super().mouseReleaseEvent(e)
 
