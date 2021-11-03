@@ -53,14 +53,9 @@ class PushButtonState(QWidget):
     _disableActionTriggered = pyqtSignal()
     _enableActionTriggered = pyqtSignal()
 
-    _hoverInEventTriggered = pyqtSignal()
-    _hoverOutEventTriggered = pyqtSignal()
-    _focusInEventTriggered = pyqtSignal()
-    _focusOutEventTriggered = pyqtSignal()
-    _mousePressEventTriggered = pyqtSignal()
-    _mouseReleaseEventTriggered = pyqtSignal()
+    _keyPressEventTriggered = pyqtSignal()  # Should not be necessary. Bug workaround.
 
-    def __init__(self, button) -> None:
+    def __init__(self, button: "PushButton") -> None:
         super().__init__()
 
         self.button = button
@@ -95,45 +90,44 @@ class PushButtonState(QWidget):
         QEventTransition(self.button, QEvent.HoverEnter, self.resting).setTargetState(self.hoverFromResting)
         QEventTransition(self.button, QEvent.HoverLeave, self.hoverFromResting).setTargetState(self.resting)
 
-        self.hoverFromResting.addTransition(self._mousePressEventTriggered, self.pressedFromHoverFromResting)
-        self.pressedFromHoverFromResting.addTransition(self._mouseReleaseEventTriggered, self.hoverFromResting)
+        QEventTransition(self.button, QEvent.MouseButtonPress, self.hoverFromResting).setTargetState(self.pressedFromHoverFromResting)
+        QEventTransition(self.button, QEvent.MouseButtonRelease, self.pressedFromHoverFromResting).setTargetState(self.hoverFromResting)
+        QEventTransition(self.button, QEvent.KeyPress, self.hoverFromResting).setTargetState(self.pressedFromHoverFromResting)
+        QEventTransition(self.button, QEvent.KeyRelease, self.pressedFromHoverFromResting).setTargetState(self.hoverFromResting)
 
-        self.resting.addTransition(self._focusInEventTriggered, self.focusFromResting)
-        self.focusFromResting.addTransition(self._focusOutEventTriggered, self.resting)
-        self.focusFromResting.addTransition(self._mousePressEventTriggered, self.pressedFromFocusFromResting)
-        self.pressedFromFocusFromResting.addTransition(self._mouseReleaseEventTriggered, self.focusFromResting)
+        QEventTransition(self.button, QEvent.FocusIn, self.resting).setTargetState(self.focusFromResting)
+        QEventTransition(self.button, QEvent.FocusOut, self.focusFromResting).setTargetState(self.resting)
+
+        QEventTransition(self.button, QEvent.MouseButtonPress, self.focusFromResting).setTargetState(self.pressedFromFocusFromResting)
+        QEventTransition(self.button, QEvent.MouseButtonRelease, self.pressedFromFocusFromResting).setTargetState(self.focusFromResting)
+
+        # Bug: causes a pressed state to be triggered when tabbing out.
+        #QEventTransition(self.button, QEvent.KeyPress, self.focusFromResting).setTargetState(self.pressedFromFocusFromResting)
+        self.focusFromResting.addTransition(self._keyPressEventTriggered, self.pressedFromFocusFromResting) 
+        QEventTransition(self.button, QEvent.KeyRelease, self.pressedFromFocusFromResting).setTargetState(self.focusFromResting)
 
         QEventTransition(self.button, QEvent.HoverEnter, self.focusFromResting).setTargetState(self.hoverFromFocusFromResting)
         QEventTransition(self.button, QEvent.HoverLeave, self.hoverFromFocusFromResting).setTargetState(self.focusFromResting)
 
-        self.hoverFromFocusFromResting.addTransition(self._mousePressEventTriggered, self.pressedFromHoverFromFocusFromResting)
-        self.pressedFromHoverFromFocusFromResting.addTransition(self._mouseReleaseEventTriggered, self.hoverFromFocusFromResting) 
+        QEventTransition(self.button, QEvent.MouseButtonPress, self.hoverFromFocusFromResting).setTargetState(self.pressedFromHoverFromFocusFromResting)
+        QEventTransition(self.button, QEvent.MouseButtonRelease, self.pressedFromHoverFromFocusFromResting).setTargetState(self.hoverFromFocusFromResting)
+        QEventTransition(self.button, QEvent.KeyPress, self.hoverFromFocusFromResting).setTargetState(self.pressedFromHoverFromFocusFromResting)
+        QEventTransition(self.button, QEvent.KeyRelease, self.pressedFromHoverFromFocusFromResting).setTargetState(self.hoverFromFocusFromResting)
 
         self._machine.start()
 
     def disable(self) -> None:
         self._disableActionTriggered.emit()
 
-    def enbable(self) -> None:
-        self.enableActionTriggered.emit()
-
     def enable(self) -> None:
         self._enableActionTriggered.emit()
 
-    def focusIn(self) -> None:
-        self._focusInEventTriggered.emit()
-
-    def focusOut(self) -> None:
-        self._focusOutEventTriggered.emit()
-
-    def press(self) -> None:
-        self._mousePressEventTriggered.emit()
-
-    def release(self) -> None:
-        self._mouseReleaseEventTriggered.emit()
-
     def postEvent(self, e: QEvent) -> None:
         self._machine.postEvent(QEvent(e))
+
+    # Should not be necessary. Bug workaround.
+    def press(self) -> None:
+        self._keyPressEventTriggered.emit()
 
 class PushButton(QPushButton):
     """
@@ -148,8 +142,6 @@ class PushButton(QPushButton):
     accordingly (typically by pressing the Space bar).
 
     This widget also emits all the events that a regular QPushButton emits.
-
-
     """
 
     # You shouldn't need to refer to these states outside this class.
@@ -232,6 +224,10 @@ class PushButton(QPushButton):
         self.state.enable()
         super().setDisabled(False)
 
+    def setDebug(debug: bool) -> None:
+        """Set debug to replace the button text by its current state."""
+        self.debug = debug
+
     def setStyles(self, state: State) -> None:
         """Set styles corresponding to a given button state.
 
@@ -302,28 +298,29 @@ class PushButton(QPushButton):
                 self.state.postEvent(e)
         if type(e) is QFocusEvent:
             if e.gotFocus():
-                self.state.focusIn()
+                self.state.postEvent(e)
             if e.lostFocus():
-                self.state.focusOut()
+                self.state.postEvent(e)
         return super().event(e)
 
     def keyPressEvent(self, e: QEvent) -> bool:
         if e.key() == Qt.Key_Space:
-            self.state.press()
+            self.state.postEvent(e)
+            self.state.press()  # Should not necessary. Bug workaround.
         return super().keyPressEvent(e)
 
     def keyReleaseEvent(self, e: QEvent) -> bool:
         if e.key() == Qt.Key_Space:
-            self.state.release()
+            self.state.postEvent(e)
         return super().keyReleaseEvent(e)
 
     def mousePressEvent(self, e: QEvent) -> bool:
         if e.button() == Qt.LeftButton:
-            self.state.press()
+            self.state.postEvent(e)
         return super().mousePressEvent(e)
 
     def mouseReleaseEvent(self, e: QEvent) -> bool:
-        self.state.release()
+        self.state.postEvent(e)
         return super().mouseReleaseEvent(e)
 
 class Main(QMainWindow):
