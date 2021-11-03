@@ -194,6 +194,9 @@ class PushButton(QPushButton):
         self.state.pressedFromHoverFromFocusFromResting.entered.connect(lambda: self.setElevation(8))
         self.state.pressedFromHoverFromFocusFromResting.entered.connect(lambda: self.setStyleSheet(self.styles))
 
+    def disable(self) -> None:
+        self.state.disable()
+
     def setElevation(self, elevation: int) -> None:
         shadow = QGraphicsDropShadowEffect(self)
         shadow.setOffset(0, 1.5*elevation)
@@ -250,13 +253,13 @@ class Main(QMainWindow):
         _addActions(self, appActions)
 
         layout = QHBoxLayout()
-        b = QPushButton("OK")
-        b.clicked.connect(lambda: print("b clicked"))
-        layout.addWidget(b)
         label = QLabel("Hello, world!")
         layout.addWidget(label)
+        b = QPushButton("Disable")
+        layout.addWidget(b)
         button = PushButton()
         button.clicked.connect(lambda: print("clicked"))
+        b.clicked.connect(lambda: button.disable())
         layout.addWidget(button)
         self.centralWidget.setLayout(layout)
 
