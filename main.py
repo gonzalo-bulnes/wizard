@@ -127,69 +127,69 @@ class PushButton(QPushButton):
                 padding: .6em 1em;
             }}
 
-            [state=enabled] {{
+            .enabled {{
                 background-color: #6000ee;
                 color: #ffffff;
             }}
 
-            [state=hover] {{
+            .hover {{
                 background-color: #6e14ef;
                 color: white;
             }}
 
-            [state=focus] {{
+            .focus {{
                 background-color: #873df2;
                 color: white;
             }}
 
-            [state=pressed] {{
+            .pressed {{
                 background-color: #9452f3;
                 color: white;
             }}
 
-            [state=disabled] {{
+            .disabled {{
                 background-color: #cccccc;
                 color: #838383;
             }}
         """
         self.setStyleSheet(self.styles)
 
-        self.state.resting.entered.connect(lambda: self.setProperty("state", "enabled"))
+        self.state.resting.entered.connect(lambda: self.setProperty("class", "enabled"))
         self.state.resting.entered.connect(lambda: self.setText("ENABLED"))
         self.state.resting.entered.connect(lambda: self.setElevation(2))
         self.state.resting.entered.connect(lambda: self.setStyleSheet(self.styles))
 
-        self.state.disabled.entered.connect(lambda: self.setProperty("state", "disabled"))
+        self.state.disabled.entered.connect(lambda: self.setProperty("class", "disabled"))
         self.state.disabled.entered.connect(lambda: self.setText("DISABLED"))
         self.state.disabled.entered.connect(lambda: self.setElevation(0))
         self.state.disabled.entered.connect(lambda: self.setStyleSheet(self.styles))
 
-        self.state.hoverFromResting.entered.connect(lambda: self.setProperty("state", "hover"))
+        self.state.hoverFromResting.entered.connect(lambda: self.setProperty("class", "hover"))
         self.state.hoverFromResting.entered.connect(lambda: self.setText("HOVER"))
         self.state.hoverFromResting.entered.connect(lambda: self.setElevation(4))
         self.state.hoverFromResting.entered.connect(lambda: self.setStyleSheet(self.styles))
 
-        self.state.hoverFromFocusFromResting.entered.connect(lambda: self.setProperty("state", "hover"))
+        self.state.hoverFromFocusFromResting.entered.connect(lambda: self.setProperty("class", "hover"))
         self.state.hoverFromFocusFromResting.entered.connect(lambda: self.setText("HOVER"))
         self.state.hoverFromFocusFromResting.entered.connect(lambda: self.setElevation(4))
         self.state.hoverFromFocusFromResting.entered.connect(lambda: self.setStyleSheet(self.styles))
 
-        self.state.focusFromResting.entered.connect(lambda: self.setProperty("state", "focus"))
+        self.state.focusFromResting.entered.connect(lambda: self.setProperty("class", "focus"))
         self.state.focusFromResting.entered.connect(lambda: self.setText("FOCUSED"))
         self.state.focusFromResting.entered.connect(lambda: self.setElevation(2))
         self.state.focusFromResting.entered.connect(lambda: self.setStyleSheet(self.styles))
 
-        self.state.pressedFromHoverFromResting.entered.connect(lambda: self.setProperty("state", "pressed"))
+        self.state.pressedFromHoverFromResting.entered.connect(lambda: self.setProperty("class", "pressed"))
         self.state.pressedFromHoverFromResting.entered.connect(lambda: self.setText("PRESSED"))
         self.state.pressedFromHoverFromResting.entered.connect(lambda: self.setElevation(8))
         self.state.pressedFromHoverFromResting.entered.connect(lambda: self.setStyleSheet(self.styles))
 
-        self.state.pressedFromFocusFromResting.entered.connect(lambda: self.setProperty("state", "pressed"))
+        self.state.pressedFromFocusFromResting.entered.connect(lambda: self.setProperty("class", "pressed"))
         self.state.pressedFromFocusFromResting.entered.connect(lambda: self.setText("PRESSED"))
         self.state.pressedFromFocusFromResting.entered.connect(lambda: self.setElevation(8))
         self.state.pressedFromFocusFromResting.entered.connect(lambda: self.setStyleSheet(self.styles))
 
-        self.state.pressedFromHoverFromFocusFromResting.entered.connect(lambda: self.setProperty("state", "pressed"))
+        self.state.pressedFromHoverFromFocusFromResting.entered.connect(lambda: self.setProperty("class", "pressed"))
         self.state.pressedFromHoverFromFocusFromResting.entered.connect(lambda: self.setText("PRESSED"))
         self.state.pressedFromHoverFromFocusFromResting.entered.connect(lambda: self.setElevation(8))
         self.state.pressedFromHoverFromFocusFromResting.entered.connect(lambda: self.setStyleSheet(self.styles))
