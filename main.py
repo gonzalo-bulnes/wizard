@@ -60,8 +60,10 @@ class PushButtonState(QWidget):
     _mousePressEventTriggered = pyqtSignal()
     _mouseReleaseEventTriggered = pyqtSignal()
 
-    def __init__(self) -> None:
+    def __init__(self, button: QPushButton) -> None:
         super().__init__()
+
+        self.button = button
 
         # Declare the state chart described in the docstring.
         # See https://doc.qt.io/qt-5/statemachine-api.html
@@ -91,6 +93,9 @@ class PushButtonState(QWidget):
         self.pressedFromHoverFromFocusFromResting = QState(self.enabled)
 
         self.resting.addTransition(self._hoverInEventTriggered, self.hoverFromResting)
+        hoverEnterTransition = QEventTransition(self.button, QEvent.HoverEnter) 
+        hoverEnterTransition.setTargetState(self.hoverFromResting)
+        self.resting.addTransition(hoverEnterTransition)
         self.hoverFromResting.addTransition(self._hoverOutEventTriggered, self.resting)
         self.hoverFromResting.addTransition(self._mousePressEventTriggered, self.pressedFromHoverFromResting)
         self.pressedFromHoverFromResting.addTransition(self._mouseReleaseEventTriggered, self.hoverFromResting)
@@ -135,6 +140,9 @@ class PushButtonState(QWidget):
     def release(self) -> None:
         self._mouseReleaseEventTriggered.emit()
 
+    def postEvent(self, e: QEvent) -> None:
+        self._machine.postEvent(e)
+
 class PushButton(QPushButton):
     """
     A QPushButton with custom styles.
@@ -172,7 +180,7 @@ class PushButton(QPushButton):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.state = PushButtonState()
+        self.state = PushButtonState(self)
         self.debug = False
 
         self.styles = f"""
@@ -297,7 +305,8 @@ class PushButton(QPushButton):
     def event(self, e: QEvent) -> bool:
         if type(e) is QHoverEvent:
             if e.oldPos() == QPoint(-1, -1):
-                self.state.hoverIn()
+                #self.state.hoverIn()
+                self.state.postEvent(e)
             if e.pos() == QPoint(-1, -1):
                 self.state.hoverOut()
         if type(e) is QFocusEvent:
