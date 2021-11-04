@@ -42,8 +42,8 @@ class PushButtonState(QWidget):
         focusFromResting --> pressedFromFocusFromResting: MousePress
         pressedFromFocusFromResting --> focusFromResting: MouseRelease
 
-        focusFromResting --> hoverFromFocusFromResting: FocusOut
-        hoverFromFocusFromResting --> focusFromResting: FocusIn
+        focusFromResting --> hoverFromFocusFromResting: HoverIn
+        hoverFromFocusFromResting --> focusFromResting: HoverOut
 
         hoverFromFocusFromResting --> pressedFromHoverFromFocusFromResting: MousePress
         pressedFromHoverFromFocusFromResting --> hoverFromFocusFromResting: MouseRelease
@@ -111,7 +111,9 @@ class PushButtonState(QWidget):
 
         QEventTransition(self.button, QEvent.MouseButtonPress, self.hoverFromFocusFromResting).setTargetState(self.pressedFromHoverFromFocusFromResting)
         QEventTransition(self.button, QEvent.MouseButtonRelease, self.pressedFromHoverFromFocusFromResting).setTargetState(self.hoverFromFocusFromResting)
-        QEventTransition(self.button, QEvent.KeyPress, self.hoverFromFocusFromResting).setTargetState(self.pressedFromHoverFromFocusFromResting)
+        # Same bug.
+        self.hoverFromFocusFromResting.addTransition(self._keyPressEventTriggered, self.pressedFromHoverFromFocusFromResting) 
+        #QEventTransition(self.button, QEvent.KeyPress, self.hoverFromFocusFromResting).setTargetState(self.pressedFromHoverFromFocusFromResting)
         QEventTransition(self.button, QEvent.KeyRelease, self.pressedFromHoverFromFocusFromResting).setTargetState(self.hoverFromFocusFromResting)
 
         self._machine.start()
