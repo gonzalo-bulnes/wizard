@@ -167,40 +167,38 @@ class PushButton(QPushButton):
         self.state = PushButtonState(self)
         self.debug = False
 
-        self.styles = f"""
-            * {{
+        self.setProperty("class", "pushButton")
+        self.styles = """
+            .pushButton {
+                background-color: #6000ee;
                 border: none;
                 border-radius: 6px;
+                color: #ffffff;
                 font: 500 18px 'Monsterrat';
                 margin-bottom: 1em;
                 outline: none;
                 padding: .6em 1em;
-            }}
+            }
 
-            .enabled {{
-                background-color: #6000ee;
-                color: #ffffff;
-            }}
-
-            .hover {{
-                background-color: #6e14ef;
-                color: white;
-            }}
-
-            .focus {{
+            .pushButton:focus {
                 background-color: #873df2;
                 color: white;
-            }}
+            }
 
-            .pressed {{
+            .pushButton:hover {
+                background-color: #6e14ef;
+                color: white;
+            }
+
+            .pushButton:pressed {
                 background-color: #9452f3;
                 color: white;
-            }}
+            }
 
-            .disabled {{
+            .pushButton:disabled {
                 background-color: #cccccc;
                 color: #838383;
-            }}
+            }
         """
         self.setStyleSheet(self.styles)
 
@@ -239,32 +237,27 @@ class PushButton(QPushButton):
         by end-users.
         """
         if state is self.StateEnabled:
-            self.setProperty("class", "enabled")
             self.setElevation(self.ElevationLow)
             self.setCursor(QCursor(Qt.PointingHandCursor))
             self.setStyleSheet(self.styles)
             if self.debug:
               self.setText("ENABLED")
         elif state is self.StateHover:
-            self.setProperty("class", "hover")
             self.setElevation(self.ElevationMedium)
             self.setStyleSheet(self.styles)
             if self.debug:
                 self.setText("HOVER")
         elif state is self.StateFocus:
-            self.setProperty("class", "focus")
             self.setElevation(self.ElevationLow)
             self.setStyleSheet(self.styles)
             if self.debug:
                 self.setText("FOCUSED")
         elif state is self.StatePressed:
-            self.setProperty("class", "pressed")
             self.setElevation(self.ElevationHigh)
             self.setStyleSheet(self.styles)
             if self.debug:
                 self.setText("PRESSED")
         else:
-            self.setProperty("class", "disabled")
             self.setElevation(self.ElevationNone)
             self.setCursor(QCursor(Qt.ArrowCursor))
             self.setStyleSheet(self.styles)
