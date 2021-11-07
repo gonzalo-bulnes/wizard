@@ -126,6 +126,11 @@ class PushButton(QPushButton):
     This widget also emits all the events that a regular QPushButton emits.
     """
 
+    # These button types are part of the API of this class.
+    Type = NewType("Type", str)
+    TypeContained = Type("contained")
+    TypeOutlined = Type("outlined")
+
     # You shouldn't need to refer to these states outside this class.
     # They are used to set styles that are not supported by QSS,
     # for example, the drop shadow that suggests the button's elevation.
@@ -145,13 +150,15 @@ class PushButton(QPushButton):
     ElevationMedium = Elevation(4)
     ElevationHigh = Elevation(8)
 
-    def __init__(self, parent=None):
+    def __init__(self, type: Type = TypeContained, parent=None):
         super().__init__(parent)
 
         self.state = PushButtonState(self)
+        self.type = type
         self.debug = False
 
-        self.setProperty("class", "button contained")
+        self.setClasses(type)
+
         with open("push_button.css", "r") as stylesheet:
             self.setStyleSheet(stylesheet.read())
 
@@ -181,6 +188,12 @@ class PushButton(QPushButton):
         if self.debug:
             self.state.pressedFromHoverFromFocusFromResting.entered.connect(lambda: print("pressedFromHoverFromFocusFromResting"))
 
+    def setClasses(self, type: Type) -> None:
+        if type is self.TypeContained:
+            self.setProperty("class", "button contained")
+        if type is self.TypeOutlined:
+            self.setProperty("class", "button outlined")
+
     def setDebug(self, debug: bool) -> None:
         """Set debug to replace the button text by its current state."""
         self.debug = debug
@@ -192,25 +205,30 @@ class PushButton(QPushButton):
         See https://material.io/components/buttons.html#contained-button
         """
         if state is self.StateEnabled:
-            self.setElevation(self.ElevationLow)
             self.setCursor(QCursor(Qt.PointingHandCursor))
+            if self.type is self.TypeContained:
+                self.setElevation(self.ElevationLow)
             if self.debug:
               self.setText("ENABLED")
         elif state is self.StateHover:
-            self.setElevation(self.ElevationMedium)
+            if self.type is self.TypeContained:
+                self.setElevation(self.ElevationMedium)
             if self.debug:
                 self.setText("HOVER")
         elif state is self.StateFocus:
-            self.setElevation(self.ElevationLow)
+            if self.type is self.TypeContained:
+                self.setElevation(self.ElevationLow)
             if self.debug:
                 self.setText("FOCUSED")
         elif state is self.StatePressed:
-            self.setElevation(self.ElevationHigh)
+            if self.type is self.TypeContained:
+                self.setElevation(self.ElevationHigh)
             if self.debug:
                 self.setText("PRESSED")
         else:
-            self.setElevation(self.ElevationNone)
             self.setCursor(QCursor(Qt.ArrowCursor))
+            if self.type is self.TypeContained:
+                self.setElevation(self.ElevationNone)
             if self.debug:
                 self.setText("DISABLED")
 

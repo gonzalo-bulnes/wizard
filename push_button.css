@@ -1,33 +1,61 @@
 .button {
-    border-radius: 6px;
-    font: 500 18px 'Monsterrat';
-    margin-bottom: 1em;
-    outline: none;
-    padding: .6em 1em;
+	border-radius: 6px;
+	font: 500 14px 'Monsterrat';
+	letter-spacing: 1px;
+	margin: 16px 4px;
+	outline: none;
+	padding: 10px 16px;
 }
 
 .contained {
-    background-color: #6000ee;
-    border: none;
-    color: #ffffff;
+	background-color: #6200ee;
+	border: 1px solid #6200ee;
+	color: #ffffff;
 }
 
 .contained:focus {
-    background-color: #873df2;
-    color: white;
+	letter-spacing: 0;
+	background-color: #873df2;
+	border: 1px solid #873df2;
+	color: white;
 }
 
 .contained:hover {
-    background-color: #6e14ef;
-    color: white;
+	background-color: #6e14ef;
+	border: 1px solid #6e14ef;
+	color: white;
 }
 
 .contained:pressed {
-    background-color: #9452f3;
-    color: white;
+	background-color: #9452f3;
+	border: 1px solid #9452f3;
+	color: white;
 }
 
 .contained:disabled {
-    background-color: #cccccc;
-    color: #838383;
+	background-color: #cccccc;
+	border: 1px solid #cccccc;
+	color: #838383;
+}
+
+.outlined {
+	border: 1px solid #aaaaaa;
+	color: #6200ee;
+}
+
+.outlined:focus {
+	background-color: rgba(98, 0, 238, 0.12);
+}
+
+.outlined:hover {
+	background-color: rgba(98, 0, 238, 0.08);
+}
+
+.outlined:pressed {
+	background-color: rgba(98, 0, 238, 0.24);
+}
+
+.outlined:disabled {
+	border: 1px solid #cccccc;
+	color: #838383;
 }

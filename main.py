@@ -30,20 +30,32 @@ class Main(QMainWindow):
         label = QLabel("Demo")
         layout.addWidget(label)
 
-        # This is our button!
-        button = PushButton()
-        button.setText("SIGN IN")
-        button.clicked.connect(lambda: self.statusBar().showMessage("Clicked!", 500))
+        # This are our buttons!
+        signIn = PushButton(PushButton.TypeContained)
+        signIn.setText("SIGN IN")
+        signIn.clicked.connect(lambda: self.statusBar().showMessage("Signed in!", 500))
+
+        signUp = PushButton(PushButton.TypeOutlined)
+        signUp.setText("SIGN UP")
+        signUp.clicked.connect(lambda: self.statusBar().showMessage("Signed up!", 500))
 
         # Support buttons.
-        disable = QPushButton("Disable button")
-        layout.addWidget(disable)
-        enable = QPushButton("Enable button")
-        layout.addWidget(enable)
-        disable.clicked.connect(lambda: button.setEnabled(False))
-        enable.clicked.connect(lambda: button.setEnabled(True))
+        disableSignIn = QPushButton("Disable signIn")
+        layout.addWidget(disableSignIn)
+        enableSignIn = QPushButton("Enable signIn")
+        layout.addWidget(enableSignIn)
+        disableSignIn.clicked.connect(lambda: signIn.setEnabled(False))
+        enableSignIn.clicked.connect(lambda: signIn.setEnabled(True))
+        layout.addWidget(signIn)
 
-        layout.addWidget(button)
+        disableSignUp = QPushButton("Disable signUp")
+        layout.addWidget(disableSignUp)
+        enableSignUp = QPushButton("Enable signUp")
+        layout.addWidget(enableSignUp)
+        disableSignUp.clicked.connect(lambda: signUp.setEnabled(False))
+        enableSignUp.clicked.connect(lambda: signUp.setEnabled(True))
+        layout.addWidget(signUp)
+
         self.centralWidget.setLayout(layout)
 
     def __createAppActions(self):
