@@ -29,11 +29,12 @@ class PushButtonState(QWidget):
       disabled --> enabled: EnabledChange
 
       state enabled {
+        [*] --> resting
         resting --> hoverFromResting: HoverEnter
         hoverFromResting --> resting: HoverLeave
 
         hoverFromResting --> pressedFromHoverFromResting: MouseButtonPress
-        pressedFromHoverFromResting --> hoverFromResting: MouseButtonRelease
+        pressedFromHoverFromResting --> hoverFromFocusFromResting: MouseButtonRelease
 
         resting --> focusFromResting: FocusIn
         focusFromResting --> resting: FocusOut
@@ -89,7 +90,7 @@ class PushButtonState(QWidget):
         QEventTransition(self._button, QEvent.HoverLeave, self.hoverFromResting).setTargetState(self.resting)
 
         SpecificMouseButtonEventTransition(self._button, QEvent.MouseButtonPress, Qt.LeftButton, self.hoverFromResting).setTargetState(self.pressedFromHoverFromResting)
-        QEventTransition(self._button, QEvent.MouseButtonRelease, self.pressedFromHoverFromResting).setTargetState(self.hoverFromResting)
+        QEventTransition(self._button, QEvent.MouseButtonRelease, self.pressedFromHoverFromResting).setTargetState(self.hoverFromFocusFromResting)
 
         QEventTransition(self._button, QEvent.FocusIn, self.resting).setTargetState(self.focusFromResting)
         QEventTransition(self._button, QEvent.FocusOut, self.focusFromResting).setTargetState(self.resting)

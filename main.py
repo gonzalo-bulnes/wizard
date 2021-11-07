@@ -38,10 +38,12 @@ class Main(QMainWindow):
         signUp = PushButton(PushButton.TypeOutlined)
         signUp.setText("SIGN UP")
         signUp.clicked.connect(lambda: self.statusBar().showMessage("Signed up!", 500))
+        signUp.setDebug(True)
 
         think = PushButton(PushButton.TypeText)
         think.setText("ASK ME TOMORROW")
         think.clicked.connect(lambda: self.statusBar().showMessage("Will ask tomorrow!", 500))
+        think.setDebug(True)
 
         # Support buttons.
         disableSignIn = QPushButton("Disable signIn")
