@@ -180,42 +180,8 @@ class PushButton(QPushButton):
         self.debug = False
 
         self.setProperty("class", "button contained")
-        self.styles = """
-            .button {
-                border-radius: 6px;
-                font: 500 18px 'Monsterrat';
-                margin-bottom: 1em;
-                outline: none;
-                padding: .6em 1em;
-            }
-
-            .contained {
-                background-color: #6000ee;
-                border: none;
-                color: #ffffff;
-            }
-
-            .contained:focus {
-                background-color: #873df2;
-                color: white;
-            }
-
-            .contained:hover {
-                background-color: #6e14ef;
-                color: white;
-            }
-
-            .contained:pressed {
-                background-color: #9452f3;
-                color: white;
-            }
-
-            .contained:disabled {
-                background-color: #cccccc;
-                color: #838383;
-            }
-        """
-        self.setStyleSheet(self.styles)
+        with open("push_button.css", "r") as stylesheet:
+            self.setStyleSheet(stylesheet.read())
 
         # Connect the style updates to the changes of internal state.
         self.state.resting.entered.connect(lambda: self.setStyles(self.StateEnabled))
