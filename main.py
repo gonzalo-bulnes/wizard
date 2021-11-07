@@ -179,35 +179,38 @@ class PushButton(QPushButton):
         self.state = PushButtonState(self)
         self.debug = True
 
-        self.setProperty("class", "pushButton")
+        self.setProperty("class", "button contained")
         self.styles = """
-            .pushButton {
-                background-color: #6000ee;
-                border: none;
+            .button {
                 border-radius: 6px;
-                color: #ffffff;
                 font: 500 18px 'Monsterrat';
                 margin-bottom: 1em;
                 outline: none;
                 padding: .6em 1em;
             }
 
-            .pushButton:focus {
+            .contained {
+                background-color: #6000ee;
+                border: none;
+                color: #ffffff;
+            }
+
+            .contained:focus {
                 background-color: #873df2;
                 color: white;
             }
 
-            .pushButton:hover {
+            .contained:hover {
                 background-color: #6e14ef;
                 color: white;
             }
 
-            .pushButton:pressed {
+            .contained:pressed {
                 background-color: #9452f3;
                 color: white;
             }
 
-            .pushButton:disabled {
+            .contained:disabled {
                 background-color: #cccccc;
                 color: #838383;
             }
