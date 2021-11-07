@@ -1,5 +1,5 @@
 .button {
-	border-radius: 6px;
+	border-radius: 4px;
 	font: 500 14px 'Monsterrat';
 	letter-spacing: 1px;
 	margin: 16px 4px;
@@ -57,5 +57,26 @@
 
 .outlined:disabled {
 	border: 1px solid #cccccc;
+	color: #838383;
+}
+
+.text {
+	border: 1px solid transparent;
+	color: #6200ee;
+}
+
+.text:focus {
+	background-color: rgba(98, 0, 238, 0.12);
+}
+
+.text:hover {
+	background-color: rgba(98, 0, 238, 0.08);
+}
+
+.text:pressed {
+	background-color: rgba(98, 0, 238, 0.24);
+}
+
+.text:disabled {
 	color: #838383;
 }

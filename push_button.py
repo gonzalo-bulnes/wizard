@@ -130,6 +130,7 @@ class PushButton(QPushButton):
     Type = NewType("Type", str)
     TypeContained = Type("contained")
     TypeOutlined = Type("outlined")
+    TypeText = Type("text")
 
     # You shouldn't need to refer to these states outside this class.
     # They are used to set styles that are not supported by QSS,
@@ -193,6 +194,8 @@ class PushButton(QPushButton):
             self.setProperty("class", "button contained")
         if type is self.TypeOutlined:
             self.setProperty("class", "button outlined")
+        if type is self.TypeText:
+            self.setProperty("class", "button text")
 
     def setDebug(self, debug: bool) -> None:
         """Set debug to replace the button text by its current state."""
@@ -245,8 +248,8 @@ class PushButton(QPushButton):
         that are provided by this class.
         """
         shadow = QGraphicsDropShadowEffect(self)
-        shadow.setOffset(0, 1.5*value)
-        shadow.setBlurRadius(4*value)
+        shadow.setOffset(0, 1*value)
+        shadow.setBlurRadius(3*value)
         shadow.setColor(QColor("#44000000"))
         self.setGraphicsEffect(shadow)
         self.update()

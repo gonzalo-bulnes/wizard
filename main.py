@@ -39,6 +39,10 @@ class Main(QMainWindow):
         signUp.setText("SIGN UP")
         signUp.clicked.connect(lambda: self.statusBar().showMessage("Signed up!", 500))
 
+        think = PushButton(PushButton.TypeText)
+        think.setText("ASK ME TOMORROW")
+        think.clicked.connect(lambda: self.statusBar().showMessage("Will ask tomorrow!", 500))
+
         # Support buttons.
         disableSignIn = QPushButton("Disable signIn")
         layout.addWidget(disableSignIn)
@@ -55,6 +59,14 @@ class Main(QMainWindow):
         disableSignUp.clicked.connect(lambda: signUp.setEnabled(False))
         enableSignUp.clicked.connect(lambda: signUp.setEnabled(True))
         layout.addWidget(signUp)
+
+        disableThink = QPushButton("Disable ask")
+        layout.addWidget(disableThink)
+        enableThink = QPushButton("Enable ask")
+        layout.addWidget(enableThink)
+        disableThink.clicked.connect(lambda: think.setEnabled(False))
+        enableThink.clicked.connect(lambda: think.setEnabled(True))
+        layout.addWidget(think)
 
         self.centralWidget.setLayout(layout)
 
