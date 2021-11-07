@@ -177,7 +177,7 @@ class PushButton(QPushButton):
         super().__init__(parent)
 
         self.state = PushButtonState(self)
-        self.debug = True
+        self.debug = False
 
         self.setProperty("class", "button contained")
         self.styles = """
@@ -248,40 +248,31 @@ class PushButton(QPushButton):
         self.debug = debug
 
     def setStyles(self, state: State) -> None:
-        """Set styles corresponding to a given button state.
+        """Set styles corresponding to a given button state that are not supported by QSS.
 
         These visual effects follows the Material Design 2 guidelines for buttons.
         See https://material.io/components/buttons.html#contained-button
-
-        The method contains some 'magic values' that are referred to in
-        the widget's stylesheet. None of them needs to be used or modified
-        by end-users.
         """
         if state is self.StateEnabled:
             self.setElevation(self.ElevationLow)
             self.setCursor(QCursor(Qt.PointingHandCursor))
-            self.setStyleSheet(self.styles)
             if self.debug:
               self.setText("ENABLED")
         elif state is self.StateHover:
             self.setElevation(self.ElevationMedium)
-            self.setStyleSheet(self.styles)
             if self.debug:
                 self.setText("HOVER")
         elif state is self.StateFocus:
             self.setElevation(self.ElevationLow)
-            self.setStyleSheet(self.styles)
             if self.debug:
                 self.setText("FOCUSED")
         elif state is self.StatePressed:
             self.setElevation(self.ElevationHigh)
-            self.setStyleSheet(self.styles)
             if self.debug:
                 self.setText("PRESSED")
         else:
             self.setElevation(self.ElevationNone)
             self.setCursor(QCursor(Qt.ArrowCursor))
-            self.setStyleSheet(self.styles)
             if self.debug:
                 self.setText("DISABLED")
 
