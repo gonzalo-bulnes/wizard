@@ -167,7 +167,7 @@ class PushButton(QPushButton):
         super().__init__(parent)
 
         self.state = PushButtonState(self)
-        self.debug = False
+        self.debug = True
 
         self.setProperty("class", "pushButton")
         self.styles = """
@@ -206,13 +206,29 @@ class PushButton(QPushButton):
 
         # Connect the style updates to the changes of internal state.
         self.state.resting.entered.connect(lambda: self.setStyles(self.StateEnabled))
+        if self.debug:
+            self.state.resting.entered.connect(lambda: print("resting"))
         self.state.disabled.entered.connect(lambda: self.setStyles(self.StateDisabled))
+        if self.debug:
+            self.state.disabled.entered.connect(lambda: print("disabled"))
         self.state.hoverFromResting.entered.connect(lambda: self.setStyles(self.StateHover))
+        if self.debug:
+            self.state.hoverFromResting.entered.connect(lambda: print("hoverFromResting"))
         self.state.hoverFromFocusFromResting.entered.connect(lambda: self.setStyles(self.StateHover))
+        if self.debug:
+            self.state.hoverFromFocusFromResting.entered.connect(lambda: print("hoverFromFocusFromResting"))
         self.state.focusFromResting.entered.connect(lambda: self.setStyles(self.StateFocus))
+        if self.debug:
+            self.state.focusFromResting.entered.connect(lambda: print("focusFromResting"))
         self.state.pressedFromHoverFromResting.entered.connect(lambda: self.setStyles(self.StatePressed))
+        if self.debug:
+            self.state.pressedFromHoverFromResting.entered.connect(lambda: print("pressedFromHoverFromResting"))
         self.state.pressedFromFocusFromResting.entered.connect(lambda: self.setStyles(self.StatePressed))
+        if self.debug:
+            self.state.pressedFromFocusFromResting.entered.connect(lambda: print("pressedFromFocusFromResting"))
         self.state.pressedFromHoverFromFocusFromResting.entered.connect(lambda: self.setStyles(self.StatePressed))
+        if self.debug:
+            self.state.pressedFromHoverFromFocusFromResting.entered.connect(lambda: print("pressedFromHoverFromFocusFromResting"))
 
     def disable(self) -> None:
         """Disable the button."""
