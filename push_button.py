@@ -127,7 +127,8 @@ class PushButton(QPushButton):
     This widget also emits all the events that a regular QPushButton emits.
     """
 
-    # These button types are part of the API of this class.
+    # These button types are part of the Python API of this class,
+    # and the string values are part of its QSS API.
     Type = NewType("Type", str)
     TypeContained = Type("contained")
     TypeOutlined = Type("outlined")
@@ -191,12 +192,8 @@ class PushButton(QPushButton):
             self.state.pressedFromHoverFromFocusFromResting.entered.connect(lambda: print("pressedFromHoverFromFocusFromResting"))
 
     def setClasses(self, type: Type) -> None:
-        if type is self.TypeContained:
-            self.setProperty("class", "button contained")
-        if type is self.TypeOutlined:
-            self.setProperty("class", "button outlined")
-        if type is self.TypeText:
-            self.setProperty("class", "button text")
+        """Set QSS class for styling purposes."""
+        self.setProperty("class", f"button {type}")
 
     def setDebug(self, debug: bool) -> None:
         """Set debug to replace the button text by its current state."""
