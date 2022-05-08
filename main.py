@@ -1,11 +1,11 @@
 import sys
-from typing import NewType
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from push_button import PushButton
+from wizard import Wizard
 
 # Magic values.
 SEPARATOR = "separator"
@@ -16,9 +16,11 @@ class Main(QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUI()
+        self._device_present = False
+        self._device_adequate = False
 
     def setupUI(self):
-        self.setWindowTitle("Widgets")
+        self.setWindowTitle("Wizard Demo")
         self.centralWidget = QWidget()
         self.setCentralWidget(self.centralWidget)
         self.statusBar()
@@ -26,51 +28,120 @@ class Main(QMainWindow):
         appActions = self.__createAppActions()
         _addActions(self, appActions)
 
-        layout = QHBoxLayout()
-        label = QLabel("Demo")
-        layout.addWidget(label)
-
-        # This are our buttons!
-        signIn = PushButton(PushButton.TypeContained)
-        signIn.setText("SIGN IN")
-        signIn.clicked.connect(lambda: self.statusBar().showMessage("Signed in!", 500))
-
-        signUp = PushButton(PushButton.TypeOutlined)
-        signUp.setText("SIGN UP")
-        signUp.clicked.connect(lambda: self.statusBar().showMessage("Signed up!", 500))
-        signUp.setDebug(True)
-
-        think = PushButton(PushButton.TypeText)
-        think.setText("ASK ME TOMORROW")
-        think.clicked.connect(lambda: self.statusBar().showMessage("Will ask tomorrow!", 500))
-        think.setDebug(True)
-
-        # Support buttons.
-        disableSignIn = QPushButton("Disable signIn")
-        layout.addWidget(disableSignIn)
-        enableSignIn = QPushButton("Enable signIn")
-        layout.addWidget(enableSignIn)
-        disableSignIn.clicked.connect(lambda: signIn.setEnabled(False))
-        enableSignIn.clicked.connect(lambda: signIn.setEnabled(True))
-        layout.addWidget(signIn)
-
-        disableSignUp = QPushButton("Disable signUp")
-        layout.addWidget(disableSignUp)
-        enableSignUp = QPushButton("Enable signUp")
-        layout.addWidget(enableSignUp)
-        disableSignUp.clicked.connect(lambda: signUp.setEnabled(False))
-        enableSignUp.clicked.connect(lambda: signUp.setEnabled(True))
-        layout.addWidget(signUp)
-
-        disableThink = QPushButton("Disable ask")
-        layout.addWidget(disableThink)
-        enableThink = QPushButton("Enable ask")
-        layout.addWidget(enableThink)
-        disableThink.clicked.connect(lambda: think.setEnabled(False))
-        enableThink.clicked.connect(lambda: think.setEnabled(True))
-        layout.addWidget(think)
-
+        layout = QVBoxLayout()
         self.centralWidget.setLayout(layout)
+
+        simulator = QWidget()
+        wizard_launcher = QWidget()
+        wizard = Wizard(self.device_present, self.device_adequate)
+        
+        layout.addWidget(wizard_launcher)
+        layout.addWidget(simulator)
+
+        # Wizard
+        layout = QVBoxLayout()
+        wizard_launcher.setLayout(layout)
+        title = QLabel("<h1>Wizard</h1>")
+        layout.addWidget(title)
+        intro = QLabel()
+        intro.setText("<p>This demo application allows to test a <b>Wizard</b>.</p><p>You can start the wizard using the button below, and simulate the insertion or removal of USB drives using the simulator.</p><p>USB drives can be inserted or removed at any time, try different combinations!</p>")
+        intro.setWordWrap(True)
+        layout.addWidget(intro)
+
+        start = PushButton(PushButton.TypeContained)
+        start.setText("START WIZARD")
+        start.clicked.connect(self.on_wizard_started)
+        layout.addWidget(start)
+
+        wizard.finished.connect(lambda: self.on_wizard_finished())
+
+        self.start = start
+        self.wizard = wizard
+
+        # Simulator
+        layout = QVBoxLayout()
+        simulator.setLayout(layout)
+        title = QLabel("<h1>USB Device Simulator</h1>")
+        layout.addWidget(title)
+        status = QLabel("<p>Loading...</p>")
+        status.setWordWrap(True)
+        layout.addWidget(status)
+
+        insertAdequateDevice = PushButton(PushButton.TypeContained)
+        insertAdequateDevice.setText("INSERT ADEQUATE USB DRIVE")
+        insertAdequateDevice.clicked.connect(self.on_adequate_device_inserted)
+        layout.addWidget(insertAdequateDevice)
+
+        insertInadequateDevice = PushButton(PushButton.TypeOutlined)
+        insertInadequateDevice.setText("INSERT INADEQUATE USB DRIVE")
+        insertInadequateDevice.clicked.connect(self.on_inadequate_device_inserted)
+        layout.addWidget(insertInadequateDevice)
+
+        removeDevice = PushButton(PushButton.TypeText)
+        removeDevice.setText("REMOVE USB DRIVE")
+        removeDevice.clicked.connect(self.on_device_removed)
+        layout.addWidget(removeDevice)
+
+        layout.addStretch()
+
+        self.insertAdequateDevice = insertAdequateDevice
+        self.insertInadequateDevice = insertInadequateDevice
+        self.removeDevice = removeDevice
+        self.status = status
+
+        self.on_device_removed()
+        
+    def device_present(self):
+        return self._device_present
+
+    def device_adequate(self):
+        return self._device_adequate
+
+    def on_adequate_device_inserted(self):
+        self._device_present = True
+        self._device_adequate = True
+        self.insertAdequateDevice.setEnabled(False)
+        self.insertAdequateDevice.hide()
+        self.insertInadequateDevice.setEnabled(False)
+        self.insertInadequateDevice.hide()
+        self.removeDevice.show()
+        self.removeDevice.setEnabled(True)
+        self.status.setText("<p>An adequate USB drive is present.</p>")
+
+    def on_inadequate_device_inserted(self):
+        self._device_present = True
+        self._device_adequate = False
+        self.insertAdequateDevice.setEnabled(False)
+        self.insertAdequateDevice.hide()
+        self.insertInadequateDevice.setEnabled(False)
+        self.insertInadequateDevice.hide()
+        self.removeDevice.show()
+        self.removeDevice.setEnabled(True)
+        self.status.setText("<p>A USB drive is <b>present</b>, but it is <b>not encrypted</b>, or is otherwise inadequate.</p>")
+
+    def on_device_removed(self):
+        self._device_present = False
+        self._device_adequate = False
+        self.removeDevice.setEnabled(False)
+        self.removeDevice.hide()
+        self.status.setText("<b>No USB drive is present.</b>")
+        self.insertAdequateDevice.show()
+        self.insertAdequateDevice.setEnabled(True)
+        self.insertInadequateDevice.show()
+        self.insertInadequateDevice.setEnabled(True)
+
+    def on_wizard_started(self):
+        self.start.setEnabled(False)
+        self.start.setText("WIZARD STARTED")
+        self.wizard.show()
+
+    def on_wizard_finished(self):
+        self.start.setText("START WIZARD")
+        self.start.setEnabled(True)
+
+    def closeEvent(self, event):
+        self.wizard.close()
+        super().closeEvent(event)
 
     def __createAppActions(self):
         quitAction = QAction("&Quit", self)
