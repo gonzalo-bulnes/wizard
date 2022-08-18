@@ -118,6 +118,8 @@ class Device(QObject):
     unlocking_has_failed = pyqtSignal()
     removed = pyqtSignal()
 
+    state_changed = pyqtSignal(str)
+
     def __init__(self):
         super().__init__()
 
@@ -131,27 +133,37 @@ class Device(QObject):
 
         self._current_state = Device.UnknownState
 
+    @property
+    def state(self):
+        return self._current_state
+
+    @state.setter
+    def state(self, state: "Device.State"):
+        print(f"Updated state to {state}")
+        self._current_state = state
+        self.state_changed.emit(state)
+
     def _on_missing_state_entered(self) -> None:
-        if self._current_state == Device.UnknownState:
-            self._current_state = Device.MissingState
+        if self.state == Device.UnknownState:
+            self.state = Device.MissingState
             self.is_missing.emit()
         else:
-            self._current_state == Device.RemovedState
+            self.state = Device.RemovedState
             self.removed.emit()
 
     def _on_unlocking_state_entered(self) -> None:
-        self._current_state == Device.UnlockingState
+        self.state = Device.UnlockingState
         self.unlocking_has_started.emit()
 
     def _on_locked_state_entered(self) -> None:
-        self._current_state == Device.LockedState
-        if self._current_state == Device.UnlockingState:
+        self.state = Device.LockedState
+        if self.state == Device.UnlockingState:
             self.unlocking_has_failed.emit()
         else:
             self.inserted_locked.emit()
 
     def _on_unlocked_state_entered(self) -> None:
-        self._current_state = Device.UnlockedState
+        self.state = Device.UnlockedState
         self.unlocking_has_succeeded.emit()
 
     def check(self, result: Command) -> None:
