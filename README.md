@@ -1,7 +1,7 @@
-Widgets
-=======
+Wizard
+======
 
-An exploration into custom styles for Qt widgets.
+An wizard that depends on an USB device with a volatile mood. (Includes a simulator where you get to play the volatile mood.) 🦢
 
 Usage
 -----
@@ -12,3 +12,8 @@ pip install -r requirements.txt
 
 python main.py
 ```
+
+Known issues
+------------
+
+The instructions get cut when the simulator is loaded. Oops. I'm sure you'll find them though 😉
