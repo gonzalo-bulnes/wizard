@@ -6,6 +6,8 @@ from PyQt5.QtWidgets import *
 
 from push_button import PushButton
 from wizard import Wizard
+from simulator import Simulator
+from device import Device
 
 # Magic values.
 SEPARATOR = "separator"
@@ -17,7 +19,7 @@ class Main(QMainWindow):
         super().__init__(parent)
         self.setupUI()
         self._device_present = False
-        self._device_adequate = False
+        self._device_locked = False
 
     def setupUI(self):
         self.setWindowTitle("Wizard Demo")
@@ -31,10 +33,11 @@ class Main(QMainWindow):
         layout = QVBoxLayout()
         self.centralWidget.setLayout(layout)
 
-        simulator = QWidget()
+        device = Device()
+        simulator = Simulator(device)
         wizard_launcher = QWidget()
-        wizard = Wizard(self.device_present, self.device_adequate)
-        
+        wizard = Wizard(device)
+
         layout.addWidget(wizard_launcher)
         layout.addWidget(simulator)
 
@@ -57,79 +60,10 @@ class Main(QMainWindow):
 
         self.start = start
         self.wizard = wizard
+        self.device = device
+        self.simulator = simulator
 
-        # Simulator
-        layout = QVBoxLayout()
-        simulator.setLayout(layout)
-        title = QLabel("<h1>USB Device Simulator</h1>")
-        layout.addWidget(title)
-        status = QLabel("<p>Loading...</p>")
-        status.setWordWrap(True)
-        layout.addWidget(status)
-
-        insertAdequateDevice = PushButton(PushButton.TypeContained)
-        insertAdequateDevice.setText("INSERT ADEQUATE USB DRIVE")
-        insertAdequateDevice.clicked.connect(self.on_adequate_device_inserted)
-        layout.addWidget(insertAdequateDevice)
-
-        insertInadequateDevice = PushButton(PushButton.TypeOutlined)
-        insertInadequateDevice.setText("INSERT INADEQUATE USB DRIVE")
-        insertInadequateDevice.clicked.connect(self.on_inadequate_device_inserted)
-        layout.addWidget(insertInadequateDevice)
-
-        removeDevice = PushButton(PushButton.TypeText)
-        removeDevice.setText("REMOVE USB DRIVE")
-        removeDevice.clicked.connect(self.on_device_removed)
-        layout.addWidget(removeDevice)
-
-        layout.addStretch()
-
-        self.insertAdequateDevice = insertAdequateDevice
-        self.insertInadequateDevice = insertInadequateDevice
-        self.removeDevice = removeDevice
-        self.status = status
-
-        self.on_device_removed()
         
-    def device_present(self):
-        return self._device_present
-
-    def device_adequate(self):
-        return self._device_adequate
-
-    def on_adequate_device_inserted(self):
-        self._device_present = True
-        self._device_adequate = True
-        self.insertAdequateDevice.setEnabled(False)
-        self.insertAdequateDevice.hide()
-        self.insertInadequateDevice.setEnabled(False)
-        self.insertInadequateDevice.hide()
-        self.removeDevice.show()
-        self.removeDevice.setEnabled(True)
-        self.status.setText("<p>An adequate USB drive is present.</p>")
-
-    def on_inadequate_device_inserted(self):
-        self._device_present = True
-        self._device_adequate = False
-        self.insertAdequateDevice.setEnabled(False)
-        self.insertAdequateDevice.hide()
-        self.insertInadequateDevice.setEnabled(False)
-        self.insertInadequateDevice.hide()
-        self.removeDevice.show()
-        self.removeDevice.setEnabled(True)
-        self.status.setText("<p>A USB drive is <b>present</b>, but it is <b>not encrypted</b>, or is otherwise inadequate.</p>")
-
-    def on_device_removed(self):
-        self._device_present = False
-        self._device_adequate = False
-        self.removeDevice.setEnabled(False)
-        self.removeDevice.hide()
-        self.status.setText("<b>No USB drive is present.</b>")
-        self.insertAdequateDevice.show()
-        self.insertAdequateDevice.setEnabled(True)
-        self.insertInadequateDevice.show()
-        self.insertInadequateDevice.setEnabled(True)
-
     def on_wizard_started(self):
         self.start.setEnabled(False)
         self.start.setText("WIZARD STARTED")
