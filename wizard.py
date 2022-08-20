@@ -24,29 +24,29 @@ class Wizard(QWizard):
 
     @pyqtSlot(str)
     def _on_device_state_changed(self, state: Device.State) -> None:
-            # Device presence
-            if self.currentId() == self._device_page_id:
-                if self._device.state == Device.UnknownState or self._device.state == Device.MissingState or self._device.state == Device.RemovedState:
-                    print("Blocking until a device is inserted.")
-                    self.button(QWizard.NextButton).setEnabled(False)
-                elif not self.button(QWizard.NextButton).isEnabled():
-                    self.button(QWizard.NextButton).setEnabled(True)
-                return
-            else:
-                if self._device.state == Device.RemovedState and self.currentId() > self._device_page_id and self.currentId() < self._summary_page_id:
-                    print("Device must be inserted!")
+        # Device presence
+        if self.currentId() == self._device_page_id:
+            if self._device.state == Device.UnknownState or self._device.state == Device.MissingState or self._device.state == Device.RemovedState:
+                print("Blocking until a device is inserted.")
+                self.button(QWizard.NextButton).setEnabled(False)
+            elif not self.button(QWizard.NextButton).isEnabled():
+                self.button(QWizard.NextButton).setEnabled(True)
+            return
+        else:
+            if self._device.state == Device.RemovedState and self.currentId() > self._device_page_id and self.currentId() < self._summary_page_id:
+                print("Device must be inserted!")
+                lastId = self.currentId()
+                while self.currentId() != self._device_page_id and self.currentId != lastId:
                     lastId = self.currentId()
-                    while self.currentId() != self._device_page_id and self.currentId != lastId:
-                        lastId = self.currentId()
-                        self.back()
+                    self.back()
 
-                # Device locking status
-                if self._device.state != Device.UnlockedState and self.currentId() > self._export_page_id and self.currentId() < self._summary_page_id:
-                    print("Device must be unlocked!")
+            # Device locking status
+            if self._device.state != Device.UnlockedState and self.currentId() > self._export_page_id and self.currentId() < self._summary_page_id:
+                print("Device must be unlocked!")
+                lastId = self.currentId()
+                while self.currentId() != self._export_page_id and self.currentId != lastId:
                     lastId = self.currentId()
-                    while self.currentId() != self._export_page_id and self.currentId != lastId:
-                        lastId = self.currentId()
-                        self.back()
+                    self.back()
 
 
     @pyqtSlot(int)
