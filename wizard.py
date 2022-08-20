@@ -4,50 +4,171 @@ from PyQt5.QtWidgets import *
 
 from device import Device
 
+class State(QWidget):
+    """
+    Paste the following state chart in https://mermaid.live for
+    a visual representation of the behavior implemented by this class!
+
+    stateDiagram-v2
+      [*] --> unknown
+      unknown --> device_missing: device_found_missing
+      unknown --> device_locked: device_locked
+      unknown --> device_unlocked: device_unlocked
+      device_missing --> device_unlocked: device_unlocked
+      device_missing --> device_locked: device_locked
+      device_locked --> device_missing: device_found_missing
+      device_locked --> device_unlocked: device_unlocked
+      device_unlocked --> device_locked: device_locked
+      device_unlocked --> device_missing: device_found_missing
+    """
+    def __init__(self, wizard: "Wizard"):
+        super().__init__()
+
+        self._wizard = wizard
+
+        # Declare the state chart described in the docstring.
+        # See https://doc.qt.io/qt-5/statemachine-api.html
+        #
+        # This is a very declarative exercise.
+        # The state names are part of the API of this class.
+        self._machine = QStateMachine()
+ 
+        self.unknown = QState()
+        self.device_missing = QState()
+        self.device_locked = QState()
+        self.device_unlocked = QState()
+
+        self.unknown.addTransition(self._wizard.device_missing, self.missing)
+        self.unknown.addTransition(self._wizard.device_locked, self.locked)
+        self.unknown.addTransition(self._wizard.device_unlocked, self.unlocked)
+        self.missing.addTransition(self._wizard.device_locked, self.locked)
+        self.missing.addTransition(self._wizard.device_unlocked, self.unlocked)
+        self.locked.addTransition(self._wizard.device_missing, self.missing)
+        self.locked.addTransition(self._wizard.device_unlocked, self.unlocked)
+        self.unlocked.addTransition(self._wizard.device_missing, self.missing)
+        self.unlocked.addTransition(self._wizard.device_locked, self.locked)
+
+        self._machine.addState(self.unknown)
+        self._machine.addState(self.missing)
+        self._machine.addState(self.locked)
+        self._machine.addState(self.unlocked)
+        self._machine.setInitialState(self.unknown)
+
+        self._machine.start()
+
 class Wizard(QWizard):
+
+    # Private API to manage pages dynamically.
+    device_missing: pyqtSignal()
+    device_locked: pyqtSignal()
+    device_unlocked: pyqtSignal()
+
     def __init__(self, device: Device, parent=None):
         super().__init__(parent)
 
+        # Connect the device
         self._device = device
         self._device.state_changed.connect(self._on_device_state_changed)
+
+        # Connect wizard page management
+        # The QWizard manages its own state as far as which page is active.
+        # The extra state allows to add and remove pages dynamically in
+        # a systematic way.
+        #self._state = State(self)
+
+        #self._state.device_missing.entered.connect(self._on_device_missing)
+        #self._state.device_locked.entered.connect(self._on_device_locked)
+        #self._state.device_unlocked.entered.connect(self._on_device_unlocked)
 
         self.setWindowTitle("Wizard")
         self.setModal(False)
 
-        self.addPage(self._create_disclaimer_page())
+        self._disclaimer_page_id = self.addPage(self._create_disclaimer_page())
         self._device_page_id = self.addPage(self._create_device_page())
         self._export_page_id = self.addPage(self._create_export_page())
-        self.addPage(self._create_files_page())
+        self._files_page_id = self.addPage(self._create_files_page())
         self._summary_page_id = self.addPage(self._create_summary_page())
 
         self.currentIdChanged.connect(self._on_page_changed)
 
-    @pyqtSlot(str)
-    def _on_device_state_changed(self, state: Device.State) -> None:
-        # Device presence
-        if self.currentId() == self._device_page_id:
-            if self._device.state == Device.UnknownState or self._device.state == Device.MissingState or self._device.state == Device.RemovedState:
-                print("Blocking until a device is inserted.")
-                self.button(QWizard.NextButton).setEnabled(False)
-            elif not self.button(QWizard.NextButton).isEnabled():
-                self.button(QWizard.NextButton).setEnabled(True)
-            return
-        else:
-            if self._device.state == Device.RemovedState and self.currentId() > self._device_page_id and self.currentId() < self._summary_page_id:
+    def _on_device_missing(self) -> None:
+        current_page_id = self.currentId()
+        if current_page_id == self._device_page_id:
+            print("Blocking until a device is inserted.")
+            self.button(QWizard.NextButton).setEnabled(False)
+        elif current_page_id > self._device_page_id and current_page_id < self._summary_page_id:
                 print("Device must be inserted!")
+            self.setPage(self._export_page_id, self._create_export_page())  # could memoize this
+            self.initializePage(current_page_id)
                 lastId = self.currentId()
                 while self.currentId() != self._device_page_id and self.currentId != lastId:
                     lastId = self.currentId()
                     self.back()
 
-            # Device locking status
-            if self._device.state != Device.UnlockedState and self.currentId() > self._export_page_id and self.currentId() < self._summary_page_id:
-                print("Device must be unlocked!")
+    def _on_device_locked(self) -> None:
+        current_page_id = self.currentId()
+        if current_page_id > self._export_page_id and current_page_id < self._summary_page_id:
+            print("Device must be unlocked!")
+            self.setPage(self._export_page_id, self._create_export_page())  # could memoize this
+            self.initializePage(current_page_id)
+            lastId = self.currentId()
+            while self.currentId() != self._export_page_id and self.currentId != lastId:
                 lastId = self.currentId()
-                while self.currentId() != self._export_page_id and self.currentId != lastId:
-                    lastId = self.currentId()
-                    self.back()
+                self.back()
 
+    def _on_device_unlocked(self) -> None:
+        current_page_id = self.currentId()
+        if current_page_id != self._export_page_id:
+            print("No neeed to prompt for a passphrase")
+            self.removePage(self._export_page_id)
+            self.initializePage(current_page_id)
+
+    def _on_device_inserted(self) -> None:
+        current_page_id = self.currentId()
+        if current_page_id != self._device_page_id:
+            print("No neeed to prompt for a device to be inserted")
+            self.removePage(self._device_page_id)
+            self.initializePage(current_page_id)
+        
+
+    @pyqtSlot(str)
+    def _on_device_state_changed(self, state: Device.State) -> None:
+        device_state = self._device.state
+        if device_state == Device.MissingState or device_state == Device.RemovedState:
+            self._on_device_missing()
+        elif device_state == Device.UnlockedState:
+            self._on_device_inserted()
+            self._on_device_unlocked()
+        elif device_state == Device.UnknownState:
+            pass
+        else:
+            print("???", device_state, Device.MissingState)
+            self._on_device_inserted()
+            self._on_device_locked()
+
+        ## Device presence
+        #if self.currentId() == self._device_page_id:
+        #    if self._device.state == Device.UnknownState or self._device.state == Device.MissingState or self._device.state == Device.RemovedState:
+        #        print("Blocking until a device is inserted.")
+        #        self.button(QWizard.NextButton).setEnabled(False)
+        #    elif not self.button(QWizard.NextButton).isEnabled():
+        #        self.button(QWizard.NextButton).setEnabled(True)
+        #    return
+        #else:
+        #    if self._device.state == Device.RemovedState and self.currentId() > self._device_page_id and self.currentId() < self._summary_page_id:
+        #        print("Device must be inserted!")
+        #        lastId = self.currentId()
+        #        while self.currentId() != self._device_page_id and self.currentId != lastId:
+        #            lastId = self.currentId()
+        #            self.back()
+
+        #    # Device locking status
+        #    if self._device.state != Device.UnlockedState and self.currentId() > self._export_page_id and self.currentId() < self._summary_page_id:
+        #        print("Device must be unlocked!")
+        #        lastId = self.currentId()
+        #        while self.currentId() != self._export_page_id and self.currentId != lastId:
+        #            lastId = self.currentId()
+        #            self.back()
 
     @pyqtSlot(int)
     def _on_page_changed(self, id: int) -> None:
