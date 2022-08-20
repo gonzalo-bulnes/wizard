@@ -83,11 +83,16 @@ class Wizard(QWizard):
         self.setWindowTitle("Wizard")
         self.setModal(False)
 
-        self._disclaimer_page_id = self.addPage(self._create_disclaimer_page())
-        self._device_page_id = self.addPage(self._create_device_page())
-        self._export_page_id = self.addPage(self._create_export_page())
-        self._files_page_id = self.addPage(self._create_files_page())
-        self._summary_page_id = self.addPage(self._create_summary_page())
+        self._disclaimer_page = self._create_disclaimer_page()
+        self._disclaimer_page_id = self.addPage(self._disclaimer_page)
+        self._device_page = self._create_device_page()
+        self._device_page_id = self.addPage(self._device_page)
+        self._export_page = self._create_export_page()
+        self._export_page_id = self.addPage(self._export_page)
+        self._files_page = self._create_files_page()
+        self._files_page_id = self.addPage(self._files_page)
+        self._summary_page = self._create_summary_page()
+        self._summary_page_id = self.addPage(self._summary_page)
 
         self.currentIdChanged.connect(self._on_page_changed)
 
@@ -98,8 +103,8 @@ class Wizard(QWizard):
             self.button(QWizard.NextButton).setEnabled(False)
         elif current_page_id > self._device_page_id and current_page_id < self._summary_page_id:
                 print("Device must be inserted!")
-            self.setPage(self._export_page_id, self._create_export_page())  # could memoize this
-            self.initializePage(current_page_id)
+                self.setPage(self._device_page_id, self._device_page)  # could memoize this
+                self.initializePage(current_page_id)
                 lastId = self.currentId()
                 while self.currentId() != self._device_page_id and self.currentId != lastId:
                     lastId = self.currentId()
@@ -109,7 +114,7 @@ class Wizard(QWizard):
         current_page_id = self.currentId()
         if current_page_id > self._export_page_id and current_page_id < self._summary_page_id:
             print("Device must be unlocked!")
-            self.setPage(self._export_page_id, self._create_export_page())  # could memoize this
+            self.setPage(self._export_page_id, self._export_page)  # could memoize this
             self.initializePage(current_page_id)
             lastId = self.currentId()
             while self.currentId() != self._export_page_id and self.currentId != lastId:
@@ -119,14 +124,14 @@ class Wizard(QWizard):
     def _on_device_unlocked(self) -> None:
         current_page_id = self.currentId()
         if current_page_id != self._export_page_id:
-            print("No neeed to prompt for a passphrase")
+            print("No need to prompt for a passphrase")
             self.removePage(self._export_page_id)
             self.initializePage(current_page_id)
 
     def _on_device_inserted(self) -> None:
         current_page_id = self.currentId()
         if current_page_id != self._device_page_id:
-            print("No neeed to prompt for a device to be inserted")
+            print("No need to prompt for a device to be inserted")
             self.removePage(self._device_page_id)
             self.initializePage(current_page_id)
         
@@ -142,7 +147,6 @@ class Wizard(QWizard):
         elif device_state == Device.UnknownState:
             pass
         else:
-            print("???", device_state, Device.MissingState)
             self._on_device_inserted()
             self._on_device_locked()
 
