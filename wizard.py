@@ -166,8 +166,3 @@ class Wizard(QWizard):
         page.setLayout(layout)
 
         return page
-
-
-class State(QObject):
-    def __init__(self):
-        super().__init__()
