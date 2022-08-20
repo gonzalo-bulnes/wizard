@@ -26,7 +26,7 @@ class Wizard(QWizard):
         self._disclaimer_page_id = self.addPage(self._disclaimer_page)
         self._device_page = self._create_device_page(self._device.state_changed)
         self._device_page_id = self.addPage(self._device_page)
-        self._export_page = self._create_export_page()
+        self._export_page = self._create_export_page(self._device.state_changed)
         self._export_page_id = self.addPage(self._export_page)
         self._files_page = self._create_files_page()
         self._files_page_id = self.addPage(self._files_page)
@@ -115,20 +115,32 @@ class Wizard(QWizard):
         page = QWizardPage()
         page.setTitle("Insert USB device")
 
-        content = QLabel("The USB device must be encrypted with LUKS or Veracrypt.")
-        content.setWordWrap(True)
+        instructions = QLabel("The USB device must be encrypted with LUKS or Veracrypt.")
+        instructions.setWordWrap(True)
+        completion_message = QLabel("USB device found, feel free to change it if needed.")
+        completion_message.hide()
 
         layout = QVBoxLayout()
-        layout.addWidget(content)
+        layout.addWidget(instructions)
+        layout.addWidget(completion_message)
         page.setLayout(layout)
 
-        page.isComplete = self._devicePageIsComplete
+        def _devicePageIsComplete() -> bool:
+            is_complete = self._device.state == Device.LockedState or self._device.state == Device.UnlockedState
+
+            if is_complete:
+                instructions.hide()
+                completion_message.show()
+            else:
+                instructions.show()
+                completion_message.hide()
+
+            return is_complete
+
+        page.isComplete = _devicePageIsComplete
         device_state_changed.connect(page.completeChanged)
 
         return page
-
-    def _devicePageIsComplete(self) -> bool:
-        return self._device.state == Device.LockedState or self._device.state == Device.UnlockedState
 
     def _create_files_page(self) -> QWizardPage:
         page = QWizardPage()
@@ -143,17 +155,37 @@ class Wizard(QWizard):
 
         return page
 
-    def _create_export_page(self) -> QWizardPage:
+    def _create_export_page(self, device_state_changed) -> QWizardPage:
         page = QWizardPage()
         page.setTitle("Unlock USB device")
 
         label = QLabel("Passphrase:")
         input = QLineEdit()
+        completion_message = QLabel("USB device unlocked.")
+        completion_message.hide()
 
         layout = QVBoxLayout()
         layout.addWidget(label)
         layout.addWidget(input)
+        layout.addWidget(completion_message)
         page.setLayout(layout)
+
+        def _exportPageIsComplete() -> bool:
+            is_complete = self._device.state == Device.UnlockedState
+
+            if is_complete:
+                label.hide()
+                input.hide()
+                completion_message.show()
+            else:
+                label.show()
+                input.show()
+                completion_message.hide()
+
+            return is_complete
+
+        page.isComplete = _exportPageIsComplete
+        device_state_changed.connect(page.completeChanged)
 
         return page
 
