@@ -24,7 +24,7 @@ class Wizard(QWizard):
 
         self._disclaimer_page = self._create_disclaimer_page()
         self._disclaimer_page_id = self.addPage(self._disclaimer_page)
-        self._device_page = self._create_device_page()
+        self._device_page = self._create_device_page(self._device.state_changed)
         self._device_page_id = self.addPage(self._device_page)
         self._export_page = self._create_export_page()
         self._export_page_id = self.addPage(self._export_page)
@@ -37,13 +37,10 @@ class Wizard(QWizard):
 
     def _on_device_missing(self) -> None:
         current_page_id = self.currentId()
-        if current_page_id == self._device_page_id:
-            print("Blocking until a device is inserted.")
-            self.button(QWizard.NextButton).setEnabled(False)
-        elif current_page_id > self._device_page_id and current_page_id < self._summary_page_id:
-                print("Device must be inserted!")
-                self.setPage(self._device_page_id, self._device_page)  # could memoize this
-                self.initializePage(current_page_id)
+        if current_page_id > self._device_page_id and current_page_id < self._summary_page_id:
+                #print("Device must be inserted!")
+                #self.setPage(self._device_page_id, self._device_page)  # could memoize this
+                #self.initializePage(current_page_id)
                 lastId = self.currentId()
                 while self.currentId() != self._device_page_id and self.currentId != lastId:
                     lastId = self.currentId()
@@ -111,7 +108,7 @@ class Wizard(QWizard):
 
         return page
 
-    def _create_device_page(self) -> QWizardPage:
+    def _create_device_page(self, device_state_changed) -> QWizardPage:
         page = QWizardPage()
         page.setTitle("Insert USB device")
 
@@ -122,7 +119,13 @@ class Wizard(QWizard):
         layout.addWidget(content)
         page.setLayout(layout)
 
+        page.isComplete = self._devicePageIsComplete
+        device_state_changed.connect(page.completeChanged)
+
         return page
+
+    def _devicePageIsComplete(self) -> bool:
+        return self._device.state == Device.LockedState or self._device.state == Device.UnlockedState
 
     def _create_files_page(self) -> QWizardPage:
         page = QWizardPage()
