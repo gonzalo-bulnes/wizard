@@ -137,7 +137,7 @@ class Wizard(QWizard):
         layout.addWidget(completion_message)
         page.setLayout(layout)
 
-        def _exportPageIsComplete() -> bool:
+        def _exportPageIsComplete() -> bool:  # validate, not complete. Complete should go to unlocking state.
             is_complete = self._device.state == Device.UnlockedState
 
             if is_complete:
@@ -153,6 +153,12 @@ class Wizard(QWizard):
 
         page.isComplete = _exportPageIsComplete
         device_state_changed.connect(page.completeChanged)
+
+        def _next() -> None:
+            self._device.attempt_unlocking()
+            page.super().next()
+
+        page.next = _next
 
         return page
 

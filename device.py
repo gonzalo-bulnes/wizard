@@ -156,15 +156,18 @@ class Device(QObject):
         self.unlocking_has_started.emit()
 
     def _on_locked_state_entered(self) -> None:
-        self.state = Device.LockedState
         if self.state == Device.UnlockingState:
             self.unlocking_has_failed.emit()
         else:
             self.inserted_locked.emit()
+        self.state = Device.LockedState
 
     def _on_unlocked_state_entered(self) -> None:
         self.state = Device.UnlockedState
         self.unlocking_has_succeeded.emit()
+
+    def attempt_unlocking(self):
+        self.unlocking_started.emit()
 
     def check(self, result: Command) -> None:
         """This method is specific to the demonstration code."""
