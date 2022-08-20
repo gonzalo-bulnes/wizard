@@ -4,57 +4,6 @@ from PyQt5.QtWidgets import *
 
 from device import Device
 
-class State(QWidget):
-    """
-    Paste the following state chart in https://mermaid.live for
-    a visual representation of the behavior implemented by this class!
-
-    stateDiagram-v2
-      [*] --> unknown
-      unknown --> device_missing: device_found_missing
-      unknown --> device_locked: device_locked
-      unknown --> device_unlocked: device_unlocked
-      device_missing --> device_unlocked: device_unlocked
-      device_missing --> device_locked: device_locked
-      device_locked --> device_missing: device_found_missing
-      device_locked --> device_unlocked: device_unlocked
-      device_unlocked --> device_locked: device_locked
-      device_unlocked --> device_missing: device_found_missing
-    """
-    def __init__(self, wizard: "Wizard"):
-        super().__init__()
-
-        self._wizard = wizard
-
-        # Declare the state chart described in the docstring.
-        # See https://doc.qt.io/qt-5/statemachine-api.html
-        #
-        # This is a very declarative exercise.
-        # The state names are part of the API of this class.
-        self._machine = QStateMachine()
- 
-        self.unknown = QState()
-        self.device_missing = QState()
-        self.device_locked = QState()
-        self.device_unlocked = QState()
-
-        self.unknown.addTransition(self._wizard.device_missing, self.missing)
-        self.unknown.addTransition(self._wizard.device_locked, self.locked)
-        self.unknown.addTransition(self._wizard.device_unlocked, self.unlocked)
-        self.missing.addTransition(self._wizard.device_locked, self.locked)
-        self.missing.addTransition(self._wizard.device_unlocked, self.unlocked)
-        self.locked.addTransition(self._wizard.device_missing, self.missing)
-        self.locked.addTransition(self._wizard.device_unlocked, self.unlocked)
-        self.unlocked.addTransition(self._wizard.device_missing, self.missing)
-        self.unlocked.addTransition(self._wizard.device_locked, self.locked)
-
-        self._machine.addState(self.unknown)
-        self._machine.addState(self.missing)
-        self._machine.addState(self.locked)
-        self._machine.addState(self.unlocked)
-        self._machine.setInitialState(self.unknown)
-
-        self._machine.start()
 
 class Wizard(QWizard):
 
@@ -69,16 +18,6 @@ class Wizard(QWizard):
         # Connect the device
         self._device = device
         self._device.state_changed.connect(self._on_device_state_changed)
-
-        # Connect wizard page management
-        # The QWizard manages its own state as far as which page is active.
-        # The extra state allows to add and remove pages dynamically in
-        # a systematic way.
-        #self._state = State(self)
-
-        #self._state.device_missing.entered.connect(self._on_device_missing)
-        #self._state.device_locked.entered.connect(self._on_device_locked)
-        #self._state.device_unlocked.entered.connect(self._on_device_unlocked)
 
         self.setWindowTitle("Wizard")
         self.setModal(False)
