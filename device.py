@@ -139,7 +139,7 @@ class Device(QObject):
 
     @state.setter
     def state(self, state: "Device.State"):
-        print(f"Updated state to {state}")
+        #print(f"Updated state to {state}")
         self._current_state = state
         self.state_changed.emit(state)
 
@@ -168,22 +168,22 @@ class Device(QObject):
 
     def check(self, result: Command) -> None:
         """This method is specific to the demonstration code."""
-        print("Simulating a device check...")
+        #print("Simulating a device check...")
         if result == Device.EmitFoundLocked:
             self.found_locked.emit()
-            print("Locked device found.")
+            #print("Locked device found.")
         if result == Device.EmitFoundUnlocked:
             self.found_unlocked.emit()
-            print("Unlocked device found.")
+            #print("Unlocked device found.")
         if result == Device.EmitNotFound:
-            print("Device not found.")
+            #print("Device not found.")
             self.not_found.emit()
         if result == Device.EmitUnlockingSucceeded: 
-            print("Device successfully unlocked.")
+            #print("Device successfully unlocked.")
             self.unlocking_succeeded.emit()
         if result == Device.EmitUnlockingFailed:
-            print("Device unlocking failed.")
+            #print("Device unlocking failed.")
             self.unlocking_failed.emit()
         if result == Device.EmitLocked:
-            print("Device locked.")
+            #print("Device locked.")
             self.locked.emit()

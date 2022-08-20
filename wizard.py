@@ -49,27 +49,30 @@ class Wizard(QWizard):
     def _on_device_locked(self) -> None:
         current_page_id = self.currentId()
         if current_page_id > self._export_page_id and current_page_id < self._summary_page_id:
-            print("Device must be unlocked!")
-            self.setPage(self._export_page_id, self._export_page)  # could memoize this
-            self.initializePage(current_page_id)
+            #print("Device must be unlocked!")
+            #self.setPage(self._export_page_id, self._export_page)  # could memoize this
+            #self.initializePage(current_page_id)
             lastId = self.currentId()
             while self.currentId() != self._export_page_id and self.currentId != lastId:
                 lastId = self.currentId()
                 self.back()
 
     def _on_device_unlocked(self) -> None:
+        #print("_on_device_unlocked")
         current_page_id = self.currentId()
         if current_page_id != self._export_page_id:
-            print("No need to prompt for a passphrase")
-            self.removePage(self._export_page_id)
-            self.initializePage(current_page_id)
+            #print("No need to prompt for a passphrase")
+            #self.removePage(self._export_page_id)
+            #self.initializePage(current_page_id)
+            pass
 
     def _on_device_inserted(self) -> None:
         current_page_id = self.currentId()
         if current_page_id != self._device_page_id:
-            print("No need to prompt for a device to be inserted")
-            self.removePage(self._device_page_id)
-            self.initializePage(current_page_id)
+            #print("No need to prompt for a device to be inserted")
+            #self.removePage(self._device_page_id)
+            #self.initializePage(current_page_id)
+            pass
         
 
     @pyqtSlot(str)
@@ -88,12 +91,12 @@ class Wizard(QWizard):
 
     @pyqtSlot(int)
     def _on_page_changed(self, id: int) -> None:
-        if id == self._device_page_id:
-            self._display_device_state()
+        #if id == self._device_page_id:
+        #    self._display_device_state()
         self._on_device_state_changed(self._device.state)
 
-    def _display_device_state(self) -> None:
-        print(f"The device state is currently: {self._device.state}")
+    #def _display_device_state(self) -> None:
+    #    print(f"The device state is currently: {self._device.state}")
 
     def _create_disclaimer_page(self) -> QWizardPage:
         page = QWizardPage()
