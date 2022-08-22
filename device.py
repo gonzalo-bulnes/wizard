@@ -85,7 +85,7 @@ class Device(QObject):
     found_unlocked = pyqtSignal()
     not_found = pyqtSignal()
 
-    unlocking_started = pyqtSignal()
+    unlocking_started = pyqtSignal(str)
     unlocking_succeeded = pyqtSignal()
     unlocking_failed = pyqtSignal()
 

@@ -31,7 +31,7 @@ class Wizard(QWizard):
         self._disclaimer_page_id = self.addPage(self._disclaimer_page)
         self._insert_device_page = self._create_insert_device_page(self._device.state_changed)
         self._insert_device_page_id = self.addPage(self._insert_device_page)
-        self._unlock_device_page = self._create_unlock_device_page(self._device.state_changed)
+        self._unlock_device_page = self._create_unlock_device_page(self._device.state_changed, self._device.unlocking_failed)
         self._unlock_device_page_id = self.addPage(self._unlock_device_page)
         self._review_files_page = self._create_review_files_page()
         self._review_files_page_id = self.addPage(self._review_files_page)
@@ -69,6 +69,7 @@ class Wizard(QWizard):
     @pyqtSlot(int)
     def _on_page_changed(self, id: int) -> None:
         self._on_device_state_changed(self._device.state)
+        self._unlock_device_page.failure_message.hide()  # Hack, or at least overreach.
 
     def _create_disclaimer_page(self) -> QWizardPage:
         page = QWizardPage()
@@ -127,7 +128,7 @@ class Wizard(QWizard):
 
         return page
 
-    def _create_unlock_device_page(self, device_state_changed) -> QWizardPage:
+    def _create_unlock_device_page(self, device_state_changed, device_unlocking_failed) -> QWizardPage:
         page = QWizardPage()
         page.setTitle("Unlock USB device")
 
@@ -137,15 +138,40 @@ class Wizard(QWizard):
         completion_message = QLabel("USB device unlocked.")
         completion_message.hide()
 
+        unlocking_message = QLabel("Unlocking USB device...")
+        unlocking_message.hide()
+        failure_message = QLabel("Failed to unlock the USB drive. Please verufy that the USB drive is adequately encrypted and the passphrase is correct.")
+        failure_message.setWordWrap(True)
+        failure_message.hide()
+        page.failure_message = failure_message
+
         button = QPushButton("Unlock")
-        button.clicked.connect(lambda: print("Unlocking!"))
 
         layout = QVBoxLayout()
+        layout.addWidget(failure_message)
         layout.addWidget(label)
         layout.addWidget(input)
         layout.addWidget(button)
+        layout.addWidget(unlocking_message)
         layout.addWidget(completion_message)
         page.setLayout(layout)
+
+        def _start_unlocking():
+            passphrase = input.text()
+            self._device.unlocking_started.emit(passphrase)
+
+            label.hide()
+            input.hide()
+            button.hide()
+            unlocking_message.show()
+            failure_message.hide()
+
+        button.clicked.connect(_start_unlocking)
+
+        def _on_unlocking_failure():
+            failure_message.show()
+
+        device_unlocking_failed.connect(_on_unlocking_failure)
 
         def _exportPageIsComplete() -> bool:  # validate, not complete. Complete should go to unlocking state.
             is_complete = self._device.state == Device.UnlockedState
@@ -154,11 +180,14 @@ class Wizard(QWizard):
                 label.hide()
                 input.hide()
                 button.hide()
+                unlocking_message.hide()
+                failure_message.hide()
                 completion_message.show()
             else:
                 label.show()
                 input.show()
                 button.show()
+                unlocking_message.hide()
                 completion_message.hide()
 
             return is_complete
