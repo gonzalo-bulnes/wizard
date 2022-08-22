@@ -72,6 +72,7 @@ class Main(QMainWindow):
     def on_wizard_finished(self):
         self.start.setText("START WIZARD")
         self.start.setEnabled(True)
+        self.wizard.restart()
 
     def closeEvent(self, event):
         self.wizard.close()
