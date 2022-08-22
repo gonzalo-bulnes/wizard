@@ -62,14 +62,14 @@ class Simulator(QWidget):
         insertLockedDevice.setEnabled(False)
         insertLockedDevice.hide()
 
-        insertUnlockedDevice = PushButton(PushButton.TypeContained)
+        insertUnlockedDevice = PushButton(PushButton.TypeOutlined)
         insertUnlockedDevice.setText("INSERT UNLOCKED USB DRIVE")
         insertUnlockedDevice.clicked.connect(self._on_unlocked_device_inserted)
         self.layout().addWidget(insertUnlockedDevice)
         insertUnlockedDevice.setEnabled(False)
         insertUnlockedDevice.hide()
 
-        lockDevice = PushButton(PushButton.TypeContained)
+        lockDevice = PushButton(PushButton.TypeOutlined)
         lockDevice.setText("LOCK USB DRIVE")
         lockDevice.clicked.connect(self._on_device_locked)
         self.layout().addWidget(lockDevice)
@@ -83,14 +83,14 @@ class Simulator(QWidget):
         unlockDevice.setEnabled(False)
         unlockDevice.hide()
 
-        removeDevice = PushButton(PushButton.TypeContained)
+        removeDevice = PushButton(PushButton.TypeText)
         removeDevice.setText("REMOVE USB DRIVE")
         removeDevice.clicked.connect(self._on_device_removed)
         self.layout().addWidget(removeDevice)
         removeDevice.setEnabled(False)
         removeDevice.hide()
 
-        simulateUnlockingFailure = PushButton(PushButton.TypeContained)
+        simulateUnlockingFailure = PushButton(PushButton.TypeOutlined)
         simulateUnlockingFailure.setText("SIMULATE UNLOCKING FAILURE")
         simulateUnlockingFailure.clicked.connect(self._on_device_unlocking_failed)
         simulateUnlockingFailure.clicked.connect(self._on_device_unlocking_failure_simulated)
