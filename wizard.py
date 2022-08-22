@@ -140,7 +140,7 @@ class Wizard(QWizard):
 
         unlocking_message = QLabel("Unlocking USB device...")
         unlocking_message.hide()
-        failure_message = QLabel("Failed to unlock the USB drive. Please verufy that the USB drive is adequately encrypted and the passphrase is correct.")
+        failure_message = QLabel("Failed to unlock the USB drive. Please verify that it is adequately encrypted (LUKS or VeraCrypt) and the passphrase is correct.")
         failure_message.setWordWrap(True)
         failure_message.hide()
         page.failure_message = failure_message

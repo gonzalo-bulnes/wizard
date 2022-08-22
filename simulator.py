@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import *
 from push_button import PushButton
 from device import Device
 
-LOADING_TIME_IN_MS = 500
+LOADING_TIME_IN_MS = 1200
 
 class Simulator(QWidget):
     """A USB device simulator"""
@@ -35,7 +35,7 @@ class Simulator(QWidget):
         self.setLayout(layout)
         title = QLabel("<h1>USB Device Simulator</h1>")
         layout.addWidget(title)
-        status = QLabel("<p>Loading...</p>")
+        status = QLabel("<p>Creating some suspense...</p>")
         status.setWordWrap(True)
         layout.addWidget(status)
         layout.setSizeConstraint(QLayout.SetFixedSize)
@@ -109,7 +109,7 @@ class Simulator(QWidget):
         self._timer = timer
 
     def _on_device_not_found(self) -> None:
-        self._status.setText("<b>No USB drive is present.</b>")
+        self._status.setText("No USB drive is present.")
         for button in self._buttons["all"]:
             button.hide()
             button.setEnabled(False)
