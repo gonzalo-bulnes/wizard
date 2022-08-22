@@ -99,7 +99,7 @@ class Wizard(QWizard):
         page.setLayout(layout)
 
         def _devicePageIsComplete() -> bool:
-            is_complete = self._device.state == Device.LockedState or self._device.state == Device.UnlockedState
+            is_complete = self._device.state == Device.LockedState or self._device.state == Device.UnlockedState or self._device.state == Device.UnlockingState
 
             if is_complete:
                 instructions.hide()

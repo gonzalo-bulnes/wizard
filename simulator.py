@@ -46,7 +46,7 @@ class Simulator(QWidget):
         self._buttons = {}
         self._buttons["device missing"] = [insertLockedDevice, insertUnlockedDevice]
         self._buttons["device locked"] = [unlockDevice, removeDevice]
-        self._buttons["device unlocking"] = [unlockDevice, simulateUnlockingFailure]
+        self._buttons["device unlocking"] = [unlockDevice, simulateUnlockingFailure, removeDevice]
         self._buttons["device unlocked"] = [lockDevice, removeDevice]
         self._buttons["all"] = [insertLockedDevice, insertUnlockedDevice, unlockDevice, lockDevice, removeDevice, simulateUnlockingFailure]
         
@@ -136,7 +136,7 @@ class Simulator(QWidget):
             button.setEnabled(True)
         
     def _on_device_unlocking_started(self, passphrase: str) -> None:
-        self._status.setText("A <b>locked</b> USB drive is present. A passphrase was submitted to unlock theUSB drive.")
+        self._status.setText("A <b>locked</b> USB drive is present. A passphrase was submitted to unlock it.")
         for button in self._buttons["all"]:
             button.hide()
             button.setEnabled(False)
