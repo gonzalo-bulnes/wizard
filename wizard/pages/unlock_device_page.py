@@ -4,6 +4,32 @@ from PyQt5.QtWidgets import *
 
 from device import Device
 
+class PassphraseInput(QWidget):
+
+    button_clicked = pyqtSignal()
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        label = QLabel("&Passphrase:")
+        input = QLineEdit()
+        label.setBuddy(input)
+
+        button = QPushButton("Unlock")
+        button.clicked.connect(self.button_clicked)
+
+        layout = QVBoxLayout()
+        layout.addWidget(label)
+        layout.addWidget(input)
+        layout.addWidget(button)
+        layout.setContentsMargins(0,0,0,0)
+        self.setLayout(layout)
+
+        self.input = input
+
+    def text(self) -> str:
+        return self.input.text()
+
 
 class UnlockDevicePage(QWizardPage):
     
@@ -11,9 +37,7 @@ class UnlockDevicePage(QWizardPage):
         super().__init__(parent)
         self.setTitle("Unlock USB device")
 
-        label = QLabel("&Passphrase:")
-        input = QLineEdit()
-        label.setBuddy(input)
+        passphrase_input = PassphraseInput()
         completion_message = QLabel("USB device unlocked.")
         completion_message.hide()
 
@@ -23,14 +47,11 @@ class UnlockDevicePage(QWizardPage):
         failure_message.setWordWrap(True)
         failure_message.hide()
 
-        button = QPushButton("Unlock")
-        button.clicked.connect(self._start_unlocking)
+        passphrase_input.button_clicked.connect(self._start_unlocking)
 
         layout = QVBoxLayout()
         layout.addWidget(failure_message)
-        layout.addWidget(label)
-        layout.addWidget(input)
-        layout.addWidget(button)
+        layout.addWidget(passphrase_input)
         layout.addWidget(unlocking_message)
         layout.addWidget(completion_message)
         self.setLayout(layout)
@@ -38,21 +59,17 @@ class UnlockDevicePage(QWizardPage):
         device_unlocking_failed.connect(self._on_unlocking_failure)
         device_state_changed.connect(self.completeChanged)
 
-        self.label = label
-        self.input = input
-        self.button = button
+        self.passphrase_input = passphrase_input
         self.completion_message = completion_message
         self.unlocking_message = unlocking_message
         self.failure_message = failure_message
 
     @pyqtSlot()
     def _start_unlocking(self):
-        passphrase = self.input.text()
+        passphrase = self.passphrase_input.text()
         self.wizard()._device.unlocking_started.emit(passphrase)
 
-        self.label.hide()
-        self.input.hide()
-        self.button.hide()
+        self.passphrase_input.hide()
         self.unlocking_message.show()
         self.failure_message.hide()
 
@@ -65,16 +82,12 @@ class UnlockDevicePage(QWizardPage):
         is_complete = device_state == Device.UnlockedState
 
         if is_complete:
-            self.label.hide()
-            self.input.hide()
-            self.button.hide()
+            self.passphrase_input.hide()
             self.unlocking_message.hide()
             self.failure_message.hide()
             self.completion_message.show()
         else:
-            self.label.show()
-            self.input.show()
-            self.button.show()
+            self.passphrase_input.show()
             self.unlocking_message.hide()
             self.completion_message.hide()
 
