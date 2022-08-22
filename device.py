@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import *
 
 class State(QWidget):
     """
-     Paste the following state chart in https://mermaid.live for
+    Paste the following state chart in https://mermaid.live for
     a visual representation of the behavior implemented by this class!
 
     stateDiagram-v2
