@@ -27,12 +27,12 @@ class Wizard(QWizard):
 
         self._disclaimer_page = self._create_disclaimer_page()
         self._disclaimer_page_id = self.addPage(self._disclaimer_page)
-        self._device_page = self._create_device_page(self._device.state_changed)
-        self._device_page_id = self.addPage(self._device_page)
-        self._export_page = self._create_export_page(self._device.state_changed)
-        self._export_page_id = self.addPage(self._export_page)
-        self._files_page = self._create_files_page()
-        self._files_page_id = self.addPage(self._files_page)
+        self._insert_device_page = self._create_insert_device_page(self._device.state_changed)
+        self._insert_device_page_id = self.addPage(self._insert_device_page)
+        self._unlock_device_page = self._create_unlock_device_page(self._device.state_changed)
+        self._unlock_device_page_id = self.addPage(self._unlock_device_page)
+        self._review_files_page = self._create_review_files_page()
+        self._review_files_page_id = self.addPage(self._review_files_page)
         self._summary_page = self._create_summary_page()
         self._summary_page_id = self.addPage(self._summary_page)
 
@@ -40,17 +40,17 @@ class Wizard(QWizard):
 
     def _on_device_missing(self) -> None:
         current_page_id = self.currentId()
-        if current_page_id > self._device_page_id and current_page_id < self._summary_page_id:
+        if current_page_id > self._insert_device_page_id and current_page_id < self._summary_page_id:
             lastId = self.currentId()
-            while self.currentId() != self._device_page_id and self.currentId != lastId:
+            while self.currentId() != self._insert_device_page_id and self.currentId != lastId:
                 lastId = self.currentId()
                 self.back()
 
     def _on_device_locked(self) -> None:
         current_page_id = self.currentId()
-        if current_page_id > self._export_page_id and current_page_id < self._summary_page_id:
+        if current_page_id > self._unlock_device_page_id and current_page_id < self._summary_page_id:
             lastId = self.currentId()
-            while self.currentId() != self._export_page_id and self.currentId != lastId:
+            while self.currentId() != self._unlock_device_page_id and self.currentId != lastId:
                 lastId = self.currentId()
                 self.back()
 
@@ -81,7 +81,7 @@ class Wizard(QWizard):
 
         return page
 
-    def _create_device_page(self, device_state_changed) -> QWizardPage:
+    def _create_insert_device_page(self, device_state_changed) -> QWizardPage:
         page = QWizardPage()
         page.setTitle("Insert USB device")
 
@@ -112,7 +112,7 @@ class Wizard(QWizard):
 
         return page
 
-    def _create_files_page(self) -> QWizardPage:
+    def _create_review_files_page(self) -> QWizardPage:
         page = QWizardPage()
         page.setTitle("Review file list")
 
@@ -125,7 +125,7 @@ class Wizard(QWizard):
 
         return page
 
-    def _create_export_page(self, device_state_changed) -> QWizardPage:
+    def _create_unlock_device_page(self, device_state_changed) -> QWizardPage:
         page = QWizardPage()
         page.setTitle("Unlock USB device")
 
