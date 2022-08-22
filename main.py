@@ -50,6 +50,7 @@ class Main(QMainWindow):
         intro.setText("<p>This demo application allows to test a <b>Wizard</b>.</p><p>You can start the wizard using the button below, and simulate the insertion or removal of USB drives using the simulator.</p><p>USB drives can be inserted or removed at any time, try different combinations!</p>")
         intro.setWordWrap(True)
         layout.addWidget(intro)
+        layout.setSizeConstraint(QLayout.SetFixedSize)
 
         start = PushButton(PushButton.TypeContained)
         start.setText("START WIZARD")

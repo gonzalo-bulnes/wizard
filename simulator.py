@@ -38,6 +38,7 @@ class Simulator(QWidget):
         status = QLabel("<p>Loading...</p>")
         status.setWordWrap(True)
         layout.addWidget(status)
+        layout.setSizeConstraint(QLayout.SetFixedSize)
 
         self._status = status
 
