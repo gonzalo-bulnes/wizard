@@ -131,14 +131,19 @@ class Wizard(QWizard):
         page = QWizardPage()
         page.setTitle("Unlock USB device")
 
-        label = QLabel("Passphrase:")
+        label = QLabel("&Passphrase:")
         input = QLineEdit()
+        label.setBuddy(input)
         completion_message = QLabel("USB device unlocked.")
         completion_message.hide()
+
+        button = QPushButton("Unlock")
+        button.clicked.connect(lambda: print("Unlocking!"))
 
         layout = QVBoxLayout()
         layout.addWidget(label)
         layout.addWidget(input)
+        layout.addWidget(button)
         layout.addWidget(completion_message)
         page.setLayout(layout)
 
@@ -148,10 +153,12 @@ class Wizard(QWizard):
             if is_complete:
                 label.hide()
                 input.hide()
+                button.hide()
                 completion_message.show()
             else:
                 label.show()
                 input.show()
+                button.show()
                 completion_message.hide()
 
             return is_complete
