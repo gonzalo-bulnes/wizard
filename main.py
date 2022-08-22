@@ -40,6 +40,7 @@ class Main(QMainWindow):
 
         layout.addWidget(wizard_launcher)
         layout.addWidget(simulator)
+        layout.addStretch(1)
 
         # Wizard
         layout = QVBoxLayout()
