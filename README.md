@@ -7,13 +7,11 @@ Usage
 -----
 
 ```sh
+# Use Python 3.9, the version matters for Qt.
+python3.9 -v venv .venv
+
 source .venv/bin/activate
 pip install -r requirements.txt
 
 python main.py
 ```
-
-Known issues
-------------
-
-The instructions get cut when the simulator is loaded. Oops. I'm sure you'll find them though 😉
