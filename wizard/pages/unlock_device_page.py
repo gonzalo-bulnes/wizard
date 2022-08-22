@@ -61,7 +61,8 @@ class UnlockDevicePage(QWizardPage):
         self.failure_message.show()
 
     def isComplete(self) -> bool:
-        is_complete = self.wizard()._device.state == Device.UnlockedState
+        device_state = self.wizard()._device.state
+        is_complete = device_state == Device.UnlockedState
 
         if is_complete:
             self.label.hide()
