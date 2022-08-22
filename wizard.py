@@ -21,6 +21,9 @@ class Wizard(QWizard):
 
         self.setWindowTitle("Wizard")
         self.setModal(False)
+        self.setOptions(
+            QWizard.NoBackButtonOnLastPage | QWizard.NoCancelButtonOnLastPage
+        )
 
         self._disclaimer_page = self._create_disclaimer_page()
         self._disclaimer_page_id = self.addPage(self._disclaimer_page)
