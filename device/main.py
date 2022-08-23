@@ -4,7 +4,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-class State(QWidget):
+class _State(QWidget):
     """
     Paste the following state chart in https://mermaid.live for
     a visual representation of the behavior implemented by this class!
@@ -79,7 +79,7 @@ class State(QWidget):
 class Device(QObject):
 
     # These signals are part of the device private API.
-    # They are used to keep track of the device state.
+    # They are used internally to keep track of the device state.
 
     found_locked = pyqtSignal()
     found_unlocked = pyqtSignal()
@@ -91,16 +91,8 @@ class Device(QObject):
 
     locked = pyqtSignal()
 
-    # These commands are specific to the demonstration code.
-    Command = NewType("Command", str)
-    EmitFoundLocked = Command("found_locked")
-    EmitFoundUnlocked = Command("found_unlocked")
-    EmitNotFound = Command("not_found")
-    EmitUnlockingSucceeded = Command("unlocking_succeeded")
-    EmitUnlockingFailed = Command("unlocking_failed")
-    EmitLocked = Command("locked")
-
-    # This signal and states are part of the device public API.
+    # This signal and states are part of the device public API,
+    # along with the public methods.
     state_changed = pyqtSignal(str)
 
     State = NewType("State", str)
@@ -111,10 +103,20 @@ class Device(QObject):
     UnlockedState = State("unlocked")
     RemovedState = State("removed")
 
+    # These commands are specific to the demonstration code.
+    Command = NewType("Command", str)
+    EmitFoundLocked = Command("found_locked")
+    EmitFoundUnlocked = Command("found_unlocked")
+    EmitNotFound = Command("not_found")
+    EmitUnlockingSucceeded = Command("unlocking_succeeded")
+    EmitUnlockingFailed = Command("unlocking_failed")
+    EmitLocked = Command("locked")
+
+
     def __init__(self):
         super().__init__()
 
-        self._state = State(self)
+        self._state = _State(self)
 
         # Track changes of state for public consumption.
         self._state.unknown.entered.connect(self._on_unknown_state_entered)
@@ -133,11 +135,18 @@ class Device(QObject):
             self.state_changed.emit(self._current_state)
         return decorated
 
+    def attempt_unlocking(self, passphrase: str):
+        self.unlocking_started.emit(passphrase)
+
     @emit_state_changed
     def _on_missing_state_entered(self) -> None:
         if self.state == Device.UnknownState:
             self._current_state = Device.MissingState
         else:
+            # We can get subtle because we have access
+            # to two subsequent states.
+            # Some user interface could take advantage
+            # of distinctions like this one.
             self._current_state = Device.RemovedState
 
     @emit_state_changed
@@ -155,9 +164,6 @@ class Device(QObject):
     @emit_state_changed
     def _on_unknown_state_entered(self) -> None:
         self._current_state = Device.UnknownState
-
-    def attempt_unlocking(self, passphrase: str):
-        self.unlocking_started.emit(passphrase)
 
     def check(self, result: Command) -> None:
         """This method is specific to the demonstration code."""
