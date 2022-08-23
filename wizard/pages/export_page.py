@@ -67,6 +67,7 @@ class ExportPage(QWizardPage):
         self._progress.hide()
         self._is_complete = True
         self.completeChanged.emit()
+        self._disconnect_export_service()
 
     @pyqtSlot()
     def _on_export_failed(self) -> None:
@@ -74,3 +75,10 @@ class ExportPage(QWizardPage):
         self._is_complete = True
         self._progress.hide()
         self.completeChanged.emit()
+
+    def _disconnect_export_service(self) -> None:
+        # This is a it of a hack. By the time we do this, we'd be better off
+        # using a state machine.
+        self._export_service.succeeded.disconnect()
+        self._export_service.failed.disconnect()
+        self._export_service.started.disconnect()
