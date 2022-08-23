@@ -115,7 +115,13 @@ class Device(QObject):
         super().__init__()
 
         self._state = State(self)
-        self._current_state = Device.UnknownState
+
+        # Track changes of state for public consumption.
+        self._state.unknown.entered.connect(self._on_unknown_state_entered)
+        self._state.missing.entered.connect(self._on_missing_state_entered)
+        self._state.unlocking.entered.connect(self._on_unlocking_state_entered)
+        self._state.resting.entered.connect(self._on_locked_state_entered)
+        self._state.unlocked.entered.connect(self._on_unlocked_state_entered)
 
     @property
     def state(self):
@@ -126,6 +132,24 @@ class Device(QObject):
         #print(f"Updated state to {state}")
         self._current_state = state
         self.state_changed.emit(state)
+
+    def _on_missing_state_entered(self) -> None:
+        if self.state == Device.UnknownState:
+            self.state = Device.MissingState
+        else:
+            self.state = Device.RemovedState
+
+    def _on_unlocking_state_entered(self) -> None:
+        self.state = Device.UnlockingState
+
+    def _on_locked_state_entered(self) -> None:
+        self.state = Device.LockedState
+
+    def _on_unlocked_state_entered(self) -> None:
+        self.state = Device.UnlockedState
+
+    def _on_unknown_state_entered(self) -> None:
+        self.state = Device.UnknownState
 
     def attempt_unlocking(self):
         self.unlocking_started.emit()
