@@ -15,26 +15,42 @@ class PassphraseInput(QWidget):
         input = QLineEdit()
         label.setBuddy(input)
 
+        checkbox = QCheckBox("&Show passphrase")
+        checkbox.stateChanged.connect(lambda: self._on_checkbox_state_changed())
+
         button = QPushButton("Unlock")
         button.clicked.connect(self.button_clicked)
 
         layout = QVBoxLayout()
         layout.addWidget(label)
         layout.addWidget(input)
+        layout.addWidget(checkbox)
         layout.addWidget(button)
         layout.setContentsMargins(0,0,0,0)
         self.setLayout(layout)
 
         self.input = input
+        self.checkbox = checkbox
+
+        self._on_checkbox_state_changed()
 
     def text(self) -> str:
         return self.input.text()
 
+    @pyqtSlot()
+    def _on_checkbox_state_changed(self) -> None:
+        if self.checkbox.isChecked():
+            self.input.setEchoMode(QLineEdit.Normal)
+        else:
+            self.input.setEchoMode(QLineEdit.Password)
+
 
 class UnlockDevicePage(QWizardPage):
     
-    def __init__(self, device_state_changed: pyqtSignal, device_unlocking_failed: pyqtSignal, parent=None):
+    def __init__(self, device: Device, parent=None):
         super().__init__(parent)
+        self._device = device
+
         self.setTitle("Unlock USB device")
 
         passphrase_input = PassphraseInput()
@@ -56,8 +72,8 @@ class UnlockDevicePage(QWizardPage):
         layout.addWidget(completion_message)
         self.setLayout(layout)
 
-        device_unlocking_failed.connect(self._on_unlocking_failure)
-        device_state_changed.connect(self.completeChanged)
+        self._device.unlocking_failed.connect(self._on_unlocking_failure)
+        self._device.state_changed.connect(self.completeChanged)
 
         self.passphrase_input = passphrase_input
         self.completion_message = completion_message
@@ -67,7 +83,7 @@ class UnlockDevicePage(QWizardPage):
     @pyqtSlot()
     def _start_unlocking(self):
         passphrase = self.passphrase_input.text()
-        self.wizard()._device.unlocking_started.emit(passphrase)
+        self._device.unlocking_started.emit(passphrase)
 
         self.passphrase_input.hide()
         self.unlocking_message.show()
@@ -78,7 +94,7 @@ class UnlockDevicePage(QWizardPage):
         self.failure_message.show()
 
     def isComplete(self) -> bool:
-        device_state = self.wizard()._device.state
+        device_state = self._device.state
         is_complete = device_state == Device.UnlockedState
 
         if is_complete:
@@ -86,6 +102,10 @@ class UnlockDevicePage(QWizardPage):
             self.unlocking_message.hide()
             self.failure_message.hide()
             self.completion_message.show()
+        elif device_state == Device.UnlockingState:
+            self.passphrase_input.hide()
+            self.unlocking_message.show()
+            self.completion_message.hide()
         else:
             self.passphrase_input.show()
             self.unlocking_message.hide()

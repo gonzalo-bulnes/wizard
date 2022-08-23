@@ -32,7 +32,7 @@ class Wizard(QWizard):
         self._disclaimer_page_id = self.addPage(self._disclaimer_page)
         self._insert_device_page = InsertDevicePage(self._device.state_changed)
         self._insert_device_page_id = self.addPage(self._insert_device_page)
-        self._unlock_device_page = UnlockDevicePage(self._device.state_changed, self._device.unlocking_failed)
+        self._unlock_device_page = UnlockDevicePage(self._device)
         self._unlock_device_page_id = self.addPage(self._unlock_device_page)
         self._review_files_page = ReviewDataPage()
         self._review_files_page_id = self.addPage(self._review_files_page)
@@ -76,3 +76,4 @@ class Wizard(QWizard):
     def _on_page_changed(self, id: int) -> None:
         self._on_device_state_changed(self._device.state)
         self._unlock_device_page.failure_message.hide()  # Hack, or at least overreach.
+        self._unlock_device_page.isComplete()
