@@ -1,10 +1,11 @@
+import os
 from typing import NewType
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from state_transitions import SpecificKeyEventTransition, SpecificMouseButtonEventTransition
+from .state_transitions import SpecificKeyEventTransition, SpecificMouseButtonEventTransition
 
 
 class PushButtonState(QWidget):
@@ -162,7 +163,8 @@ class PushButton(QPushButton):
 
         self.setClasses(type)
 
-        with open("push_button.css", "r") as stylesheet:
+        dirname = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(dirname, "push_button.css"), "r") as stylesheet:
             self.setStyleSheet(stylesheet.read())
 
         # Connect the style updates to the changes of internal state.

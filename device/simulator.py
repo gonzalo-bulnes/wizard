@@ -5,7 +5,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from push_button import PushButton
+from buttons import PushButton
 from .main import Device
 
 LOADING_TIME_IN_MS = 1200
