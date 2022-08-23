@@ -127,29 +127,34 @@ class Device(QObject):
     def state(self):
         return self._current_state
 
-    @state.setter
-    def state(self, state: "Device.State"):
-        #print(f"Updated state to {state}")
-        self._current_state = state
-        self.state_changed.emit(state)
+    def emit_state_changed(func):
+        def decorated(self):
+            func(self)
+            self.state_changed.emit(self._current_state)
+        return decorated
 
+    @emit_state_changed
     def _on_missing_state_entered(self) -> None:
         if self.state == Device.UnknownState:
-            self.state = Device.MissingState
+            self._current_state = Device.MissingState
         else:
-            self.state = Device.RemovedState
+            self._current_state = Device.RemovedState
 
+    @emit_state_changed
     def _on_unlocking_state_entered(self) -> None:
-        self.state = Device.UnlockingState
+        self._current_state = Device.UnlockingState
 
+    @emit_state_changed
     def _on_locked_state_entered(self) -> None:
-        self.state = Device.LockedState
+        self._current_state = Device.LockedState
 
+    @emit_state_changed
     def _on_unlocked_state_entered(self) -> None:
-        self.state = Device.UnlockedState
+        self._current_state = Device.UnlockedState
 
+    @emit_state_changed
     def _on_unknown_state_entered(self) -> None:
-        self.state = Device.UnknownState
+        self._current_state = Device.UnknownState
 
     def attempt_unlocking(self):
         self.unlocking_started.emit()
