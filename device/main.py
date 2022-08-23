@@ -79,21 +79,20 @@ class _State(QWidget):
 class Device(QObject):
 
     # These signals are part of the device private API.
-    # They are used internally to keep track of the device state.
-
+    # They are used internally to keep track of the device state by
+    # triggering state machine transitions in the _State instance.
     found_locked = pyqtSignal()
     found_unlocked = pyqtSignal()
     not_found = pyqtSignal()
-
-    unlocking_started = pyqtSignal(str)
     unlocking_succeeded = pyqtSignal()
     unlocking_failed = pyqtSignal()
-
     locked = pyqtSignal()
+    # Additionally, unlocking_started (below) is used too.
 
-    # This signal and states are part of the device public API,
+    # These two signals and states are part of the device public API,
     # along with the public methods.
     state_changed = pyqtSignal(str)
+    unlocking_started = pyqtSignal(str)
 
     State = NewType("State", str)
     UnknownState = State("unknown")
@@ -102,15 +101,6 @@ class Device(QObject):
     UnlockingState = State("unlocking")
     UnlockedState = State("unlocked")
     RemovedState = State("removed")
-
-    # These commands are specific to the demonstration code.
-    Command = NewType("Command", str)
-    EmitFoundLocked = Command("found_locked")
-    EmitFoundUnlocked = Command("found_unlocked")
-    EmitNotFound = Command("not_found")
-    EmitUnlockingSucceeded = Command("unlocking_succeeded")
-    EmitUnlockingFailed = Command("unlocking_failed")
-    EmitLocked = Command("locked")
 
 
     def __init__(self):
@@ -164,6 +154,17 @@ class Device(QObject):
     @emit_state_changed
     def _on_unknown_state_entered(self) -> None:
         self._current_state = Device.UnknownState
+
+    # These commands and method are specific to the demonstration code,
+    # they wouldn't be present if it wasn't for the simulator.
+
+    Command = NewType("Command", str)
+    EmitFoundLocked = Command("found_locked")
+    EmitFoundUnlocked = Command("found_unlocked")
+    EmitNotFound = Command("not_found")
+    EmitUnlockingSucceeded = Command("unlocking_succeeded")
+    EmitUnlockingFailed = Command("unlocking_failed")
+    EmitLocked = Command("locked")
 
     def check(self, result: Command) -> None:
         """This method is specific to the demonstration code."""
