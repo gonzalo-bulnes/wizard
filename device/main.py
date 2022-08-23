@@ -100,7 +100,9 @@ class Device(QObject):
     EmitUnlockingFailed = Command("unlocking_failed")
     EmitLocked = Command("locked")
 
-    # These states are private.
+    # This signal and states are part of the device public API.
+    state_changed = pyqtSignal(str)
+
     State = NewType("State", str)
     UnknownState = State("unknown")
     MissingState = State("missing")
@@ -109,28 +111,10 @@ class Device(QObject):
     UnlockedState = State("unlocked")
     RemovedState = State("removed")
 
-    # These signals are part of the device public API.
-    is_missing = pyqtSignal()
-    inserted_locked = pyqtSignal()
-    inserted_unlocked = pyqtSignal()
-    unlocking_has_started = pyqtSignal()
-    unlocking_has_succeeded = pyqtSignal()
-    unlocking_has_failed = pyqtSignal()
-    removed = pyqtSignal()
-
-    state_changed = pyqtSignal(str)
-
     def __init__(self):
         super().__init__()
 
         self._state = State(self)
-
-        # Make the changes of state public:
-        self._state.missing.entered.connect(self._on_missing_state_entered)
-        self._state.unlocking.entered.connect(self._on_unlocking_state_entered)
-        self._state.resting.entered.connect(self._on_locked_state_entered)
-        self._state.unlocked.entered.connect(self._on_unlocked_state_entered)
-
         self._current_state = Device.UnknownState
 
     @property
@@ -142,29 +126,6 @@ class Device(QObject):
         #print(f"Updated state to {state}")
         self._current_state = state
         self.state_changed.emit(state)
-
-    def _on_missing_state_entered(self) -> None:
-        if self.state == Device.UnknownState:
-            self.state = Device.MissingState
-            self.is_missing.emit()
-        else:
-            self.state = Device.RemovedState
-            self.removed.emit()
-
-    def _on_unlocking_state_entered(self) -> None:
-        self.state = Device.UnlockingState
-        self.unlocking_has_started.emit()
-
-    def _on_locked_state_entered(self) -> None:
-        if self.state == Device.UnlockingState:
-            self.unlocking_has_failed.emit()
-        else:
-            self.inserted_locked.emit()
-        self.state = Device.LockedState
-
-    def _on_unlocked_state_entered(self) -> None:
-        self.state = Device.UnlockedState
-        self.unlocking_has_succeeded.emit()
 
     def attempt_unlocking(self):
         self.unlocking_started.emit()
