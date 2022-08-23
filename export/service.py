@@ -25,8 +25,16 @@ class Service(QObject):
 
         self._device = device
 
-        # Ensure that changed in the device state affect the exports.
-        # TODO
+        # Ensure that changes in the device state cause the export to fail.
+        self._device.not_found.connect(self.failed)
+        self._device.found_locked.connect(self.failed)
+        self._device.found_unlocked.connect(self.failed)
+        self._device.unlocking_started.connect(self.failed)
+        self._device.unlocking_failed.connect(self.failed)
+        self._device.unlocking_succeeded.connect(self.failed)
+        self._device.locked.connect(self.failed)
+        self.failed.connect(self.finished)
+        self.succeeded.connect(self.finished)
 
     @pyqtSlot()
     def start(self):
@@ -37,11 +45,9 @@ class Service(QObject):
         #print("Simulating a device check...")
         if result == Service.EmitFailed:
             self.failed.emit()
-            self.finished.emit()
             #print("Export failed.")
         if result == Service.EmitSucceeded:
             self.succeeded.emit()
-            self.finished.emit()
             #print("Export suceeded")
         if result == Service.EmitFinished:
             self.finished.emit()
