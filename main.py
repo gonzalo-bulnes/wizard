@@ -6,8 +6,7 @@ from PyQt5.QtWidgets import *
 
 from push_button import PushButton
 from wizard import Wizard
-from simulator import Simulator
-from device import Device
+from device import Device, Simulator as DeviceSimulator
 
 # Magic values.
 SEPARATOR = "separator"
@@ -34,12 +33,12 @@ class Main(QMainWindow):
         self.centralWidget.setLayout(layout)
 
         device = Device()
-        simulator = Simulator(device)
+        device_simulator = DeviceSimulator(device)
         wizard_launcher = QWidget()
         wizard = Wizard(device)
 
         layout.addWidget(wizard_launcher)
-        layout.addWidget(simulator)
+        layout.addWidget(device_simulator)
         layout.addStretch(1)
 
         # Wizard
@@ -48,7 +47,7 @@ class Main(QMainWindow):
         title = QLabel("<h1>Wizard</h1>")
         layout.addWidget(title)
         intro = QLabel()
-        intro.setText("<p>This demo application allows to test a <b>Wizard</b>.</p><p>You can start the wizard using the button below, and simulate the insertion or removal of USB drives using the simulator.</p><p>USB drives can be inserted or removed at any time, try different combinations!</p>")
+        intro.setText("<p>This demo application allows to test a <b>Wizard</b>.</p><p>You can start the wizard using the button below, and simulate the insertion or removal of USB drives using the simulator.</p><p>USB drives can be inserted or removed at any time, try different combinations!</p><p>Once you're ready to export, you can still use the device simulator! And you can also use the export simulator to try a wider variety of scenarios.</p><p>Combine things the way you want, there are bonus points for breaking the wizard.</p>")
         intro.setWordWrap(True)
         layout.addWidget(intro)
         layout.setSizeConstraint(QLayout.SetFixedSize)
@@ -63,7 +62,7 @@ class Main(QMainWindow):
         self.start = start
         self.wizard = wizard
         self.device = device
-        self.simulator = simulator
+        self.device_simulator = device_simulator
 
         
     def on_wizard_started(self):
