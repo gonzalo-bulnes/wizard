@@ -83,7 +83,7 @@ class UnlockDevicePage(QWizardPage):
     @pyqtSlot()
     def _start_unlocking(self):
         passphrase = self.passphrase_input.text()
-        self._device.unlocking_started.emit(passphrase)
+        self._device.attempt_unlocking(passphrase)
 
         self.passphrase_input.hide()
         self.unlocking_message.show()

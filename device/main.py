@@ -156,8 +156,8 @@ class Device(QObject):
     def _on_unknown_state_entered(self) -> None:
         self._current_state = Device.UnknownState
 
-    def attempt_unlocking(self):
-        self.unlocking_started.emit()
+    def attempt_unlocking(self, passphrase: str):
+        self.unlocking_started.emit(passphrase)
 
     def check(self, result: Command) -> None:
         """This method is specific to the demonstration code."""
