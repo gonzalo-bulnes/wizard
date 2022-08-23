@@ -48,6 +48,7 @@ class Wizard(QWizard):
     def _device_state(self):
         self._device.state
 
+    @pyqtSlot()  # I'm not sure this one needs to be a slot, but I'll err on the side of caution.
     def _on_device_missing(self) -> None:
         current_page_id = self.currentId()
         if current_page_id > self._insert_device_page_id and current_page_id < self._summary_page_id:
