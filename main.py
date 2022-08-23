@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import *
 from buttons import PushButton
 from wizard import Wizard
 from device import Device, Simulator as DeviceSimulator
+import export
 
 # Magic values.
 SEPARATOR = "separator"
@@ -34,11 +35,16 @@ class Main(QMainWindow):
 
         device = Device()
         device_simulator = DeviceSimulator(device)
+
+        export_service = export.Service(device)
+        export_simulator = export.Simulator(export_service)
+
         wizard_launcher = QWidget()
-        wizard = Wizard(device)
+        wizard = Wizard(device, export_service)
 
         layout.addWidget(wizard_launcher)
         layout.addWidget(device_simulator)
+        layout.addWidget(export_simulator)
         layout.addStretch(1)
 
         # Wizard

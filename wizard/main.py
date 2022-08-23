@@ -3,6 +3,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from device import Device
+import export
 from .pages import StartPage, InsertDevicePage, UnlockDevicePage, ReviewDataPage, ExportPage
 
 
@@ -13,12 +14,14 @@ class Wizard(QWizard):
     device_locked: pyqtSignal()
     device_unlocked: pyqtSignal()
 
-    def __init__(self, device: Device, parent=None):
+    def __init__(self, device: Device, export_service: export.Service, parent=None):
         super().__init__(parent)
 
         # Connect the device
         self._device = device
         self._device.state_changed.connect(self._on_device_state_changed)
+
+        self._export_service = export_service
 
         self.setWindowTitle("Wizard")
         self.setModal(False)
@@ -36,7 +39,7 @@ class Wizard(QWizard):
         self._unlock_device_page_id = self.addPage(self._unlock_device_page)
         self._review_files_page = ReviewDataPage()
         self._review_files_page_id = self.addPage(self._review_files_page)
-        self._summary_page = ExportPage()
+        self._summary_page = ExportPage(self._export_service)
         self._summary_page_id = self.addPage(self._summary_page)
 
         self.currentIdChanged.connect(self._on_page_changed)
@@ -77,3 +80,7 @@ class Wizard(QWizard):
         self._on_device_state_changed(self._device.state)
         self._unlock_device_page.failure_message.hide()  # Hack, or at least overreach.
         self._unlock_device_page.isComplete()
+
+        current_page_id = self.currentId()
+        if current_page_id == self._summary_page_id:
+            self._export_service.start()
