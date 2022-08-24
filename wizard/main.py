@@ -38,8 +38,6 @@ class Wizard(QWizard):
 
         self.setStartId(Wizard.PageId.START)
 
-        self.currentIdChanged.connect(self._on_page_changed)
-
     @pyqtSlot(str)
     def _on_device_state_changed(self, state: Device.State) -> None:
         device_state = self._device.state
@@ -58,7 +56,3 @@ class Wizard(QWizard):
     def _back_to_page(self, id: "Wizard.PageId") -> None:
         while self.currentId() > id:  # assumes that pages are sorted by ID, which is true
             self.back()
-
-    @pyqtSlot(int)
-    def _on_page_changed(self, id: int) -> None:
-        self._on_device_state_changed(self._device.state)  # very inelegant
