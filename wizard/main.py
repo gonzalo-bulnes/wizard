@@ -44,14 +44,19 @@ class Wizard(QWizard):
         page_id = self.currentId()
 
         # this method screams for thorough unit testing - the proof-of-concept works
-        if device_state == Device.MissingState or device_state == Device.RemovedState:
-            if page_id > Wizard.PageId.INSERT_DEVICE and page_id < Wizard.PageId.EXPORT:
-                self._back_to_page(Wizard.PageId.INSERT_DEVICE)
-        elif device_state == Device.UnlockedState or device_state == Device.UnknownState:
-            pass
-        else:
-            if page_id > Wizard.PageId.UNLOCK_DEVICE and page_id < Wizard.PageId.EXPORT:
-                self._back_to_page(Wizard.PageId.UNLOCK_DEVICE)
+        if page_id >= Wizard.PageId.EXPORT:
+            return  # once the export is started, device events are handled in place
+
+        if device_state == Device.UnknownState:
+            pass  # only happens on the Wizard.PageId.START, where it's OK
+        elif device_state == Device.MissingState or device_state == Device.RemovedState:
+            if page_id > Wizard.PageId.INSERT_DEVICE:  # after that page, the device presence is required
+                self._back_to_page(Wizard.PageId.INSERT_DEVICE)  # let's get it back!
+        elif device_state == Device.UnlockedState:
+            pass  # unlocked devices are always OK!
+        else:  # covers the varied states of locked devices
+            if page_id > Wizard.PageId.UNLOCK_DEVICE:  # after that page, the device must be unlocked
+                self._back_to_page(Wizard.PageId.UNLOCK_DEVICE)  # let's go unlock it!
 
     def _back_to_page(self, id: "Wizard.PageId") -> None:
         while self.currentId() > id:  # assumes that pages are sorted by ID, which is true
