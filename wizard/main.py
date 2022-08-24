@@ -1,3 +1,5 @@
+from enum import IntEnum
+
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -9,10 +11,7 @@ from .pages import StartPage, InsertDevicePage, UnlockDevicePage, ReviewDataPage
 
 class Wizard(QWizard):
 
-    # Private API to manage pages dynamically.
-    device_missing: pyqtSignal()
-    device_locked: pyqtSignal()
-    device_unlocked: pyqtSignal()
+    PageId = IntEnum('PageId', 'START INSERT_DEVICE UNLOCK_DEVICE REVIEW_DATA EXPORT')
 
     def __init__(self, device: Device, export_service: export.Service, parent=None):
         super().__init__(parent)
@@ -31,57 +30,41 @@ class Wizard(QWizard):
             QWizard.NoBackButtonOnStartPage
         )
 
-        self._disclaimer_page = StartPage()
-        self._disclaimer_page_id = self.addPage(self._disclaimer_page)
-        self._insert_device_page = InsertDevicePage(self._device.state_changed)
-        self._insert_device_page_id = self.addPage(self._insert_device_page)
-        self._unlock_device_page = UnlockDevicePage(self._device)
-        self._unlock_device_page_id = self.addPage(self._unlock_device_page)
-        self._review_files_page = ReviewDataPage()
-        self._review_files_page_id = self.addPage(self._review_files_page)
-        self._summary_page = ExportPage(self._export_service)
-        self._summary_page_id = self.addPage(self._summary_page)
+        self.setPage(Wizard.PageId.START, StartPage())
+        self.setPage(Wizard.PageId.INSERT_DEVICE, InsertDevicePage(self._device.state_changed))
+        self.setPage(Wizard.PageId.UNLOCK_DEVICE, UnlockDevicePage(self._device))
+        self.setPage(Wizard.PageId.REVIEW_DATA, ReviewDataPage())
+        self.setPage(Wizard.PageId.EXPORT, ExportPage(self._export_service))
+
+        self.setStartId(Wizard.PageId.START)
 
         self.currentIdChanged.connect(self._on_page_changed)
-
-    @property
-    def _device_state(self):
-        self._device.state
-
-    @pyqtSlot()  # I'm not sure this one needs to be a slot, but I'll err on the side of caution.
-    def _on_device_missing(self) -> None:
-        current_page_id = self.currentId()
-        if current_page_id > self._insert_device_page_id and current_page_id < self._summary_page_id:
-            lastId = self.currentId()
-            while self.currentId() != self._insert_device_page_id and self.currentId != lastId:
-                lastId = self.currentId()
-                self.back()
-
-    @pyqtSlot()  # I'm not sure this one needs to be a slot, but I'll err on the side of caution.
-    def _on_device_locked(self) -> None:
-        current_page_id = self.currentId()
-        if current_page_id > self._unlock_device_page_id and current_page_id < self._summary_page_id:
-            lastId = self.currentId()
-            while self.currentId() != self._unlock_device_page_id and self.currentId != lastId:
-                lastId = self.currentId()
-                self.back()
 
     @pyqtSlot(str)
     def _on_device_state_changed(self, state: Device.State) -> None:
         device_state = self._device.state
+        page_id = self.currentId()
+
+        # this method screams for thorough unit testing - the proof-of-concept works
         if device_state == Device.MissingState or device_state == Device.RemovedState:
-            self._on_device_missing()
+            if page_id > Wizard.PageId.INSERT_DEVICE and page_id < Wizard.PageId.EXPORT:
+                self._back_to_page(Wizard.PageId.INSERT_DEVICE)
         elif device_state == Device.UnlockedState or device_state == Device.UnknownState:
             pass
         else:
-            self._on_device_locked()
+            if page_id > Wizard.PageId.UNLOCK_DEVICE and page_id < Wizard.PageId.EXPORT:
+                self._back_to_page(Wizard.PageId.UNLOCK_DEVICE)
+
+    def _back_to_page(self, id: "Wizard.PageId") -> None:
+        while self.currentId() > id:  # assumes that pages are sorted by ID, which is true
+            self.back()
 
     @pyqtSlot(int)
     def _on_page_changed(self, id: int) -> None:
-        self._on_device_state_changed(self._device.state)
-        self._unlock_device_page.failure_message.hide()  # Hack, or at least overreach.
-        self._unlock_device_page.isComplete()
+        self._on_device_state_changed(self._device.state)  # very inelegant
 
-        current_page_id = self.currentId()
-        if current_page_id == self._summary_page_id:
+        self.page(Wizard.PageId.UNLOCK_DEVICE).failure_message.hide()  # hack, at least overreach
+        self.page(Wizard.PageId.UNLOCK_DEVICE).isComplete()
+
+        if self.currentId() == Wizard.PageId.EXPORT:  # Wizard.PageId can be compared to int
             self._export_service.start()
