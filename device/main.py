@@ -81,6 +81,8 @@ class Device(QObject):
     # These signals are part of the device private API.
     # They are used internally to keep track of the device state by
     # triggering state machine transitions in the _State instance.
+    #
+    # In this demo, the simulator connects to this API, but that's a hack.
     found_locked = pyqtSignal()
     found_unlocked = pyqtSignal()
     not_found = pyqtSignal()
@@ -116,7 +118,7 @@ class Device(QObject):
         self._state.unlocked.entered.connect(self._on_unlocked_state_entered)
 
     @property
-    def state(self):
+    def state(self) -> "Device.State":
         return self._current_state
 
     def emit_state_changed(func):
@@ -125,7 +127,7 @@ class Device(QObject):
             self.state_changed.emit(self._current_state)
         return decorated
 
-    def attempt_unlocking(self, passphrase: str):
+    def attempt_unlocking(self, passphrase: str) -> None:
         self.unlocking_started.emit(passphrase)
 
     @emit_state_changed
@@ -135,7 +137,7 @@ class Device(QObject):
         else:
             # We can get subtle because we have access
             # to two subsequent states.
-            # Some user interface could take advantage
+            # Some user interfaces could take advantage
             # of distinctions like this one.
             self._current_state = Device.RemovedState
 
@@ -157,6 +159,10 @@ class Device(QObject):
 
     # These commands and method are specific to the demonstration code,
     # they wouldn't be present if it wasn't for the simulator.
+    #
+    # If this class depended in some service responsible for monitoring
+    # the actual state of the device outside of the GUI, a similar API
+    # could be defined to bring the information into the GUI scope.
 
     Command = NewType("Command", str)
     EmitFoundLocked = Command("found_locked")
