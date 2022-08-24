@@ -22,15 +22,11 @@ class Progress(QWidget):
 
 
 class ExportPage(QWizardPage):
-    
+
     def __init__(self, export_service: export.Service, parent=None):
         super().__init__(parent)
 
         self._export_service = export_service
-
-        self._export_service.succeeded.connect(self._on_export_succeeded)
-        self._export_service.failed.connect(self._on_export_failed)
-        self._export_service.started.connect(self._on_export_started)
 
         self.setTitle("Export")
 
@@ -54,6 +50,11 @@ class ExportPage(QWizardPage):
     def isComplete(self) -> bool:
         return self._is_complete
 
+    def initializePage(self) -> None:
+        super().initializePage()
+        self._connect_export_service()
+        self._export_service.start()
+
     @pyqtSlot()
     def _on_export_started(self) -> None:
         self._content.setText("<p>Exporting files...</p>")
@@ -75,10 +76,16 @@ class ExportPage(QWizardPage):
         self._is_complete = True
         self._progress.hide()
         self.completeChanged.emit()
+        self._disconnect_export_service()
+
+    def _connect_export_service(self) -> None:
+        self._export_service.succeeded.connect(self._on_export_succeeded)
+        self._export_service.failed.connect(self._on_export_failed)
+        self._export_service.started.connect(self._on_export_started)
 
     def _disconnect_export_service(self) -> None:
         # This is a it of a hack. By the time we do this, we'd be better off
         # using a state machine.
-        self._export_service.succeeded.disconnect()
-        self._export_service.failed.disconnect()
-        self._export_service.started.disconnect()
+        self._export_service.succeeded.disconnect(self._on_export_succeeded)
+        self._export_service.failed.disconnect(self._on_export_failed)
+        self._export_service.started.disconnect(self._on_export_started)

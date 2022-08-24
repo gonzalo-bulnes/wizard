@@ -65,6 +65,3 @@ class Wizard(QWizard):
 
         self.page(Wizard.PageId.UNLOCK_DEVICE).failure_message.hide()  # hack, at least overreach
         self.page(Wizard.PageId.UNLOCK_DEVICE).isComplete()
-
-        if self.currentId() == Wizard.PageId.EXPORT:  # Wizard.PageId can be compared to int
-            self._export_service.start()
