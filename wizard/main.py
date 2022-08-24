@@ -62,6 +62,3 @@ class Wizard(QWizard):
     @pyqtSlot(int)
     def _on_page_changed(self, id: int) -> None:
         self._on_device_state_changed(self._device.state)  # very inelegant
-
-        self.page(Wizard.PageId.UNLOCK_DEVICE).failure_message.hide()  # hack, at least overreach
-        self.page(Wizard.PageId.UNLOCK_DEVICE).isComplete()
