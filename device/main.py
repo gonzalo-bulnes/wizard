@@ -20,13 +20,13 @@ class _State(QWidget):
 
       locked --> missing: not_found
       unlocked --> missing: not_found
- 
+
       state locked {
         [*] --> resting
         resting --> unlocking: unlocking_started
         unlocking --> resting: unlocking_failed
       }
- 
+
       locked --> unlocked: unlocking_succeeded
       unlocked --> locked: locked
     """
@@ -41,7 +41,7 @@ class _State(QWidget):
         # This is a very declarative exercise.
         # The state names are part of the API of this class.
         self._machine = QStateMachine()
- 
+
         self.unknown = QState()
         self.missing = QState()
         self.locked = QState()
@@ -172,24 +172,24 @@ class Device(QObject):
     EmitUnlockingFailed = Command("unlocking_failed")
     EmitLocked = Command("locked")
 
-    def check(self, result: Command) -> None:
+    def check(self, desired_result: Command) -> None:
         """This method is specific to the demonstration code."""
         #print("Simulating a device check...")
-        if result == Device.EmitFoundLocked:
+        if desired_result == Device.EmitFoundLocked:
             self.found_locked.emit()
             #print("Locked device found.")
-        if result == Device.EmitFoundUnlocked:
+        if desired_result == Device.EmitFoundUnlocked:
             self.found_unlocked.emit()
             #print("Unlocked device found.")
-        if result == Device.EmitNotFound:
+        if desired_result == Device.EmitNotFound:
             #print("Device not found.")
             self.not_found.emit()
-        if result == Device.EmitUnlockingSucceeded: 
+        if desired_result == Device.EmitUnlockingSucceeded:
             #print("Device successfully unlocked.")
             self.unlocking_succeeded.emit()
-        if result == Device.EmitUnlockingFailed:
+        if desired_result == Device.EmitUnlockingFailed:
             #print("Device unlocking failed.")
             self.unlocking_failed.emit()
-        if result == Device.EmitLocked:
+        if desired_result == Device.EmitLocked:
             #print("Device locked.")
             self.locked.emit()
