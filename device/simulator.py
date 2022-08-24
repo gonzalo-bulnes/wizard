@@ -144,9 +144,6 @@ class Simulator(QWidget):
             button.show()
             button.setEnabled(True)
 
-    def _on_device_unlocking_succeeded(self) -> None:
-        self._on_device_found_unlocked()
-
     def _on_device_unlocking_failed(self) -> None:
         self._on_device_found_locked()
 
@@ -162,12 +159,8 @@ class Simulator(QWidget):
     def _on_device_locked(self):
         self._device.check(Device.EmitLocked)
 
-    def _on_device_unlocking_success_simulated(self):
-        self._device.check(Device.EmitUnlockingSucceeded)
-
     def _on_device_unlocking_failure_simulated(self):
         self._device.check(Device.EmitUnlockingFailed)
-
 
     def _on_device_unlocked(self):
         self._device.check(Device.EmitUnlockingSucceeded)
