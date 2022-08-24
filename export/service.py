@@ -8,47 +8,50 @@ from device import Device
 
 class Service(QObject):
 
-    # These signals are part of the service public API.
+    # These signals are part of the service public API,
+    # along with the public methods.
     failed = pyqtSignal()
     succeeded = pyqtSignal()
     started = pyqtSignal()
     finished = pyqtSignal()
-
-    # These commands are specific to the demonstration code.
-    Command = NewType("Command", str)
-    EmitFailed = Command("failed")
-    EmitSucceeded = Command("succeeded")
-    EmitFinished = Command("finished")
 
     def __init__(self, device: Device):
         super().__init__()
 
         self._device = device
 
-        # Ensure that changes in the device state cause the export to fail.
-        self._device.not_found.connect(self.failed)
-        self._device.found_locked.connect(self.failed)
-        self._device.found_unlocked.connect(self.failed)
-        self._device.unlocking_started.connect(self.failed)
-        self._device.unlocking_failed.connect(self.failed)
-        self._device.unlocking_succeeded.connect(self.failed)
-        self._device.locked.connect(self.failed)
+        self._device.state_changed.connect(self._on_device_state_changed)
+
         self.failed.connect(self.finished)
         self.succeeded.connect(self.finished)
 
-    @pyqtSlot()
-    def start(self):
+    def start(self) -> None:
         self.started.emit()
+        # ...and do whatever the export is supposed to be.
+        #
+        # This method would require proper error handling,
+        # and probably some guards along the lines of:
+        # if self._device.state != Device.UnlockedState:
 
-    def check(self, result: Command) -> None:
+    def _on_device_state_changed(self, state: Device.State) -> None:
+        if state != Device.UnlockedState:
+            self.failed.emit()
+
+    # These commands and method are specific to the demonstration code.
+    Command = NewType("Command", str)
+    EmitFailed = Command("failed")
+    EmitSucceeded = Command("succeeded")
+    EmitFinished = Command("finished")
+
+    def check(self, desired_result: Command) -> None:
         """This method is specific to the demonstration code."""
         #print("Simulating a device check...")
-        if result == Service.EmitFailed:
+        if desired_result == Service.EmitFailed:
             self.failed.emit()
             #print("Export failed.")
-        if result == Service.EmitSucceeded:
+        if desired_result == Service.EmitSucceeded:
             self.succeeded.emit()
             #print("Export suceeded")
-        if result == Service.EmitFinished:
+        if desired_result == Service.EmitFinished:
             self.finished.emit()
             #print("Export finished")
