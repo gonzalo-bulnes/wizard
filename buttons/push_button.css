@@ -1,15 +1,17 @@
 .button {
-	border-radius: 4px;
+	border-radius: 2px;
 	font: 500 14px 'Monsterrat';
 	letter-spacing: 1px;
-	margin: 16px 4px;
+	margin: 4px 4px;
 	outline: none;
 	padding: 10px 16px;
 }
 
 .contained {
 	background-color: #6200ee;
+	background-color: #283593;
 	border: 1px solid #6200ee;
+	border: 1px solid #283593;
 	color: #ffffff;
 }
 
@@ -18,18 +20,34 @@
 	background-color: #873df2;
 	border: 1px solid #873df2;
 	color: white;
+	background-color: #283593;
+	border: 1px solid #283593;
+	background-color: rgba(0, 229, 255, 0.96);
+	border: 1px solid rgba(0, 229, 255, 0.96);
+	border: 1px solid #aaaaaa;
+	color: #001064;
 }
 
 .contained:hover {
 	background-color: #6e14ef;
 	border: 1px solid #6e14ef;
 	color: white;
+	background-color: #283593;
+	border: 1px solid #283593;
+	background-color: rgba(0, 229, 255, 0.48);
+	border: 1px solid #aaaaaa;
+	color: #001064;
 }
 
 .contained:pressed {
 	background-color: #9452f3;
 	border: 1px solid #9452f3;
 	color: white;
+	background-color: #283593;
+	border: 1px solid #283593;
+	background-color: rgba(0, 229, 255, 0.32);
+	border: 1px solid #aaaaaa;
+	color: #001064;
 }
 
 .contained:disabled {
@@ -41,18 +59,23 @@
 .outlined {
 	border: 1px solid #aaaaaa;
 	color: #6200ee;
+	color: #283593;
+	color: #001064;
 }
 
 .outlined:focus {
 	background-color: rgba(98, 0, 238, 0.12);
+	background-color: rgba(0, 229, 255, 0.48);
 }
 
 .outlined:hover {
 	background-color: rgba(98, 0, 238, 0.08);
+	background-color: rgba(0, 229, 255, 0.96);
 }
 
 .outlined:pressed {
 	background-color: rgba(98, 0, 238, 0.24);
+	background-color: rgba(0, 229, 255, 0.32);
 }
 
 .outlined:disabled {
@@ -63,18 +86,27 @@
 .text {
 	border: 1px solid transparent;
 	color: #6200ee;
+	color: #283593;
+	color: #001064;
 }
 
 .text:focus {
 	background-color: rgba(98, 0, 238, 0.12);
+	background-color: rgba(0, 229, 255, 0.48);
+	color: black;
 }
 
 .text:hover {
 	background-color: rgba(98, 0, 238, 0.08);
+	background-color: rgba(0, 229, 255, 0.08);
+	background-color: rgba(0, 229, 255, 0.96);
+	color: black;
 }
 
 .text:pressed {
 	background-color: rgba(98, 0, 238, 0.24);
+	background-color: rgba(0, 178, 204, 0.32);
+	color: black;
 }
 
 .text:disabled {
