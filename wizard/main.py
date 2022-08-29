@@ -38,6 +38,13 @@ class Wizard(QWizard):
 
         self.setStartId(Wizard.PageId.START)
 
+        for page in [self.page(id) for id in self.pageIds()]:
+            page.completeChanged.connect(lambda: self._set_focus(QWizard.WizardButton.NextButton))
+
+    @pyqtSlot(int)
+    def _set_focus(self, which: QWizard.WizardButton) -> None:
+        self.button(which).setFocus(True)
+
     @pyqtSlot(str)
     def _on_device_state_changed(self, state: Device.State) -> None:
         device_state = self._device.state
