@@ -110,6 +110,10 @@ class PushButtonState(QWidget):
         SpecificKeyEventTransition(self._button, QEvent.KeyPress, Qt.Key_Space,  self.hoverFromFocusFromResting).setTargetState(self.pressedFromHoverFromFocusFromResting)
         SpecificKeyEventTransition(self._button, QEvent.KeyRelease, Qt.Key_Space, self.pressedFromHoverFromFocusFromResting).setTargetState(self.hoverFromFocusFromResting)
 
+    def start(self, initially_enabled: bool = True) -> None:
+        self._machine.setInitialState(self.enabled)
+        if not initially_enabled:
+            self._machine.setInitialState(self.disabled)
         self._machine.start()
 
 
@@ -167,6 +171,19 @@ class PushButton(QPushButton):
         with open(os.path.join(dirname, "push_button.css"), "r") as stylesheet:
             self.setStyleSheet(stylesheet.read())
 
+        self._start_state_machine()
+
+    def _start_state_machine(self) -> None:
+        """Ensures that the initial state is correct.
+
+        The button instance must be created before setEnabled() is called,
+        at which point its inital state becomes known.
+        The state machine must be started before its state transitions are acted upon.
+        """
+        QTimer.singleShot(200, lambda: self.state.start(self.isEnabled()))
+        QTimer.singleShot(200, lambda: self._connect_state_transitions())
+
+    def _connect_state_transitions(self) -> None:
         # Connect the style updates to the changes of internal state.
         self.state.resting.entered.connect(lambda: self.setStyles(self.StateEnabled))
         if self.debug:
