@@ -171,7 +171,7 @@ class PushButton(QPushButton):
         dirname = os.path.dirname(os.path.abspath(__file__))
 
         with open(os.path.join(dirname, "push_button.css"), "r") as stylesheet:
-            self.setStyleSheet(stylesheet.read().replace("{", "BEGIN").replace("}", "END").replace("<", "{").replace(">", "}").format(**theme.material_purple).replace("BEGIN", "{").replace("END", "}"))  # oops! XD
+            self.setStyleSheet(stylesheet.read().replace("{", "BEGIN").replace("}", "END").replace("<", "{").replace(">", "}").format(**theme.blue_and_cyan).replace("BEGIN", "{").replace("END", "}"))  # oops! XD
 
         self._start_state_machine()
 
