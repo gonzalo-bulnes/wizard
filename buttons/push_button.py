@@ -5,6 +5,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+import theme
 from .state_transitions import SpecificKeyEventTransition, SpecificMouseButtonEventTransition
 
 
@@ -168,8 +169,9 @@ class PushButton(QPushButton):
         self.setClasses(type)
 
         dirname = os.path.dirname(os.path.abspath(__file__))
+
         with open(os.path.join(dirname, "push_button.css"), "r") as stylesheet:
-            self.setStyleSheet(stylesheet.read())
+            self.setStyleSheet(stylesheet.read().replace("{", "BEGIN").replace("}", "END").replace("<", "{").replace(">", "}").format(**theme.material_purple).replace("BEGIN", "{").replace("END", "}"))  # oops! XD
 
         self._start_state_machine()
 

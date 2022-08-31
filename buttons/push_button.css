@@ -1,5 +1,5 @@
 .button {
-	border-radius: 2px;
+	border-radius: <button-border-radius>;
 	font: 500 14px 'Monsterrat';
 	letter-spacing: 1px;
 	margin: 4px 4px;
@@ -8,107 +8,78 @@
 }
 
 .contained {
-	background-color: #6200ee;
-	background-color: #283593;
-	border: 1px solid #6200ee;
-	border: 1px solid #283593;
-	color: #ffffff;
+	background-color: <button-contained-background-color>;
+	border: 1px solid <button-contained-border-color>;
+	color: <button-contained-color>;
 }
 
 .contained:focus {
 	letter-spacing: 0;
-	background-color: #873df2;
-	border: 1px solid #873df2;
-	color: white;
-	background-color: #283593;
-	border: 1px solid #283593;
-	background-color: rgba(0, 229, 255, 0.96);
-	border: 1px solid rgba(0, 229, 255, 0.96);
-	border: 1px solid #aaaaaa;
-	color: #001064;
+	background-color: <button-contained-background-color-focus>;
+	border: 1px solid <button-contained-border-color-focus>;
+	color: <button-contained-color-focus>;
 }
 
 .contained:hover {
-	background-color: #6e14ef;
-	border: 1px solid #6e14ef;
-	color: white;
-	background-color: #283593;
-	border: 1px solid #283593;
-	background-color: rgba(0, 229, 255, 0.48);
-	border: 1px solid #aaaaaa;
-	color: #001064;
+	background-color: <button-contained-background-color-hover>;
+	border: 1px solid <button-contained-border-color-hover>;
+	color: <button-contained-color-hover>;
 }
 
 .contained:pressed {
-	background-color: #9452f3;
-	border: 1px solid #9452f3;
-	color: white;
-	background-color: #283593;
-	border: 1px solid #283593;
-	background-color: rgba(0, 229, 255, 0.32);
-	border: 1px solid #aaaaaa;
-	color: #001064;
+	background-color: <button-contained-background-color-pressed>;
+	border: 1px solid <button-contained-border-color-pressed>;
+	color: <button-contained-color-pressed>;
 }
 
 .contained:disabled {
-	background-color: #cccccc;
-	border: 1px solid #cccccc;
-	color: #838383;
+	background-color: <button-contained-background-color-disabled>;
+	border: 1px solid <button-contained-border-color-disabled>;
+	color: <button-contained-color-disabled>;
 }
 
 .outlined {
-	border: 1px solid #aaaaaa;
-	color: #6200ee;
-	color: #283593;
-	color: #001064;
+	border: 1px solid <button-outlined-border-color>;
+	color: <button-outlined-color>;
 }
 
 .outlined:focus {
-	background-color: rgba(98, 0, 238, 0.12);
-	background-color: rgba(0, 229, 255, 0.48);
+	background-color: <button-outlined-background-color-focus>;
 }
 
 .outlined:hover {
-	background-color: rgba(98, 0, 238, 0.08);
-	background-color: rgba(0, 229, 255, 0.96);
+	background-color: <button-outlined-background-color-hover>;
 }
 
 .outlined:pressed {
-	background-color: rgba(98, 0, 238, 0.24);
-	background-color: rgba(0, 229, 255, 0.32);
+	background-color: <button-outlined-background-color-pressed>;
 }
 
 .outlined:disabled {
-	border: 1px solid #cccccc;
-	color: #838383;
+	border: 1px solid <button-outlined-border-color-disabled>;
+	color: <button-outlined-color-disabled>;
 }
 
 .text {
-	border: 1px solid transparent;
-	color: #6200ee;
-	color: #283593;
-	color: #001064;
+	border: 1px solid <button-text-border-color>;
+	color: <button-text-color>;
 }
 
 .text:focus {
-	background-color: rgba(98, 0, 238, 0.12);
-	background-color: rgba(0, 229, 255, 0.48);
-	color: black;
+	background-color: <button-text-background-color-focus>;
+	color: <button-text-color-focus>;
 }
 
 .text:hover {
-	background-color: rgba(98, 0, 238, 0.08);
-	background-color: rgba(0, 229, 255, 0.08);
-	background-color: rgba(0, 229, 255, 0.96);
-	color: black;
+	background-color: <button-text-background-color-focus>;
+	color: <button-text-color-hover>;
 }
 
 .text:pressed {
-	background-color: rgba(98, 0, 238, 0.24);
-	background-color: rgba(0, 178, 204, 0.32);
-	color: black;
+	background-color: <button-text-background-color-pressed>;
+	color: <button-text-color-pressed>;
 }
 
 .text:disabled {
-	color: #838383;
+	color: <button-text-color-disabled>;
 }
