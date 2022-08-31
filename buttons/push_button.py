@@ -5,6 +5,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+import theme
 from .state_transitions import SpecificKeyEventTransition, SpecificMouseButtonEventTransition
 
 
@@ -154,7 +155,7 @@ class PushButton(QPushButton):
     # https://material.io/design/environment/elevation.html#default-elevations
     Elevation = NewType("Elevation", int)
     ElevationNone = Elevation(0)
-    ElevationLow = Elevation(2)
+    ElevationLow = Elevation(3)
     ElevationMedium = Elevation(4)
     ElevationHigh = Elevation(8)
 
@@ -168,8 +169,9 @@ class PushButton(QPushButton):
         self.setClasses(type)
 
         dirname = os.path.dirname(os.path.abspath(__file__))
+
         with open(os.path.join(dirname, "push_button.css"), "r") as stylesheet:
-            self.setStyleSheet(stylesheet.read())
+            self.setStyleSheet(stylesheet.read().replace("{", "BEGIN").replace("}", "END").replace("<", "{").replace(">", "}").format(**theme.blue_and_cyan).replace("BEGIN", "{").replace("END", "}"))  # oops! XD
 
         self._start_state_machine()
 
@@ -265,8 +267,9 @@ class PushButton(QPushButton):
         that are provided by this class.
         """
         shadow = QGraphicsDropShadowEffect(self)
-        shadow.setOffset(0, 1*value)
+        shadow.setOffset(0, 0.7*value)
         shadow.setBlurRadius(3*value)
         shadow.setColor(QColor("#44000000"))
+        shadow.setColor(QColor("#0000e5ff"))
         self.setGraphicsEffect(shadow)
         self.update()
