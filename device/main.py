@@ -11,24 +11,23 @@ class _State(QWidget):
 
     stateDiagram-v2
       [*] --> unknown
-      unknown --> unlocked: found_unlocked
       unknown --> locked: found_locked
       unknown --> missing: not_found
-
-      missing --> unlocked: found_unlocked
-      missing --> locked: found_locked
-
-      locked --> missing: not_found
-      unlocked --> missing: not_found
+      unknown --> unlocked: found_unlocked
 
       state locked {
         [*] --> resting
         resting --> unlocking: unlocking_started
         unlocking --> resting: unlocking_failed
       }
-
+      locked --> missing: not_found
       locked --> unlocked: unlocking_succeeded
+
+      missing --> locked: found_locked
+      missing --> unlocked: found_unlocked
+
       unlocked --> locked: locked
+      unlocked --> missing: not_found
     """
     def __init__(self, device: "Device"):
         super().__init__()
