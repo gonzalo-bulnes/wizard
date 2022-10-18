@@ -86,14 +86,17 @@ class Device(QObject):
     found_unlocked = pyqtSignal()
     not_found = pyqtSignal()
     unlocking_succeeded = pyqtSignal()
-    unlocking_failed = pyqtSignal()
     locked = pyqtSignal()
-    # Additionally, unlocking_started (below) is used too.
+    # Additionally, unlocking_started and unlocking_failed (below) are used too.
 
-    # These two signals and states are part of the device public API,
+    # The following signals and states are part of the device public API,
     # along with the public methods.
     state_changed = pyqtSignal(str)
+
+    # These two signals could be replaced by states if if the history
+    # of states was recorded. For now, they are part of the public API.
     unlocking_started = pyqtSignal(str)
+    unlocking_failed = pyqtSignal()
 
     State = NewType("State", str)
     UnknownState = State("unknown")

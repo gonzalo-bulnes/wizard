@@ -31,7 +31,7 @@ class Wizard(QWizard):
         )
 
         self.setPage(Wizard.PageId.START, StartPage())
-        self.setPage(Wizard.PageId.INSERT_DEVICE, InsertDevicePage(self._device.state_changed))
+        self.setPage(Wizard.PageId.INSERT_DEVICE, InsertDevicePage(self._device))
         self.setPage(Wizard.PageId.UNLOCK_DEVICE, UnlockDevicePage(self._device))
         self.setPage(Wizard.PageId.REVIEW_DATA, ReviewDataPage())
         self.setPage(Wizard.PageId.EXPORT, ExportPage(self._export_service))

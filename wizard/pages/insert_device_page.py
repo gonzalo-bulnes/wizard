@@ -7,8 +7,10 @@ from device import Device
 
 class InsertDevicePage(QWizardPage):
     
-    def __init__(self, device_state_changed: pyqtSignal, parent=None):
+    def __init__(self, device: Device, parent=None):
         super().__init__(parent)
+
+        self._device = device
 
         self.setTitle("Insert USB device")
 
@@ -22,13 +24,13 @@ class InsertDevicePage(QWizardPage):
         layout.addWidget(completion_message)
         self.setLayout(layout)
 
-        device_state_changed.connect(self.completeChanged)
+        self._device.state_changed.connect(self.completeChanged)
 
         self.instructions = instructions
         self.completion_message = completion_message
 
     def isComplete(self) -> bool:
-        device_state = self.wizard()._device.state
+        device_state = self._device.state
         is_complete = device_state == Device.LockedState or device_state == Device.UnlockedState or device_state == Device.UnlockingState
 
         if is_complete:
