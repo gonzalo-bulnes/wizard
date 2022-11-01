@@ -1,3 +1,5 @@
+import os
+
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -23,9 +25,15 @@ class InsertDevicePage(QWizardPage):
         self.setLayout(layout)
 
         device_state_changed.connect(self.completeChanged)
+        self.completeChanged.connect(self._on_complete_changed)
 
         self.instructions = instructions
         self.completion_message = completion_message
+
+    def _on_complete_changed(self) -> None:
+        dirname = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(dirname, "page.css"), "r") as stylesheet:
+            self.setStyleSheet(stylesheet.read())
 
     def isComplete(self) -> bool:
         device_state = self.wizard()._device.state

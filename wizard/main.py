@@ -1,3 +1,4 @@
+import os
 from enum import IntEnum
 
 from PyQt5.QtCore import *
@@ -40,6 +41,10 @@ class Wizard(QWizard):
 
         for page in [self.page(id) for id in self.pageIds()]:
             page.completeChanged.connect(lambda: self._set_focus(QWizard.WizardButton.NextButton))
+
+        dirname = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(dirname, "wizard.css"), "r") as stylesheet:
+            self.setStyleSheet(stylesheet.read())
 
     @pyqtSlot(int)
     def _set_focus(self, which: QWizard.WizardButton) -> None:

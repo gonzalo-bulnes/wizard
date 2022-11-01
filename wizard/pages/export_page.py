@@ -1,3 +1,5 @@
+import os
+
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -46,6 +48,10 @@ class ExportPage(QWizardPage):
 
         self._content = content
         self._progress = progress
+
+        dirname = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(dirname, "page.css"), "r") as stylesheet:
+            self.setStyleSheet(stylesheet.read())
 
     def isComplete(self) -> bool:
         return self._is_complete

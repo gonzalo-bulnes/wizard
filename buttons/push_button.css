@@ -1,82 +1,76 @@
 .button {
-	border-radius: 4px;
-	font: 500 14px 'Monsterrat';
-	letter-spacing: 1px;
-	margin: 16px 4px;
-	outline: none;
-	padding: 10px 16px;
+	margin: 0px 0px 0px 12px;
+	height: 40px;
+	margin: 0;
+	padding-left: 20px;
+	padding-right: 20px;
+	border: 2px solid #2a319d;
+	font-family: 'Montserrat';
+	font-weight: 500;
+	font-size: 15px;
+	color: #2a319d;
 }
 
 .contained {
-	background-color: #6200ee;
-	border: 1px solid #6200ee;
-	color: #ffffff;
+	background-color: #2a319d;
+	color: #fff;
 }
 
 .contained:focus {
-	letter-spacing: 0;
-	background-color: #873df2;
-	border: 1px solid #873df2;
-	color: white;
+	/* Intentionally left blank. */
 }
 
 .contained:hover {
-	background-color: #6e14ef;
-	border: 1px solid #6e14ef;
-	color: white;
+	/* Intentionally left blank. */
 }
 
 .contained:pressed {
-	background-color: #9452f3;
-	border: 1px solid #9452f3;
-	color: white;
+	/* Intentionally left blank. */
 }
 
 .contained:disabled {
-	background-color: #cccccc;
-	border: 1px solid #cccccc;
-	color: #838383;
+	border: 2px solid #c2c4e3;
+	background-color: #c2c4e3;
+	color: #e1e2f1;
 }
 
 .outlined {
-	border: 1px solid #aaaaaa;
-	color: #6200ee;
+	/* Intentionally left blank. */
 }
 
 .outlined:focus {
-	background-color: rgba(98, 0, 238, 0.12);
+	/* Intentionally left blank. */
 }
 
 .outlined:hover {
-	background-color: rgba(98, 0, 238, 0.08);
+	/* Intentionally left blank. */
 }
 
 .outlined:pressed {
-	background-color: rgba(98, 0, 238, 0.24);
+	/* Intentionally left blank. */
 }
 
 .outlined:disabled {
-	border: 1px solid #cccccc;
-	color: #838383;
+	border: 2px solid rgba(42, 49, 157, 0.4);
+	color: rgba(42, 49, 157, 0.4);
 }
 
 .text {
-	border: 1px solid transparent;
-	color: #6200ee;
+	/* Intentionally left blank. */
 }
 
 .text:focus {
-	background-color: rgba(98, 0, 238, 0.12);
+	/* Intentionally left blank. */
 }
 
 .text:hover {
-	background-color: rgba(98, 0, 238, 0.08);
+	/* Intentionally left blank. */
 }
 
 .text:pressed {
-	background-color: rgba(98, 0, 238, 0.24);
+	/* Intentionally left blank. */
 }
 
 .text:disabled {
-	color: #838383;
+	/* Intentionally left blank. */
 }

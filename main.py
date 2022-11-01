@@ -5,7 +5,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from buttons import PushButton
-from wizard import Wizard
+from wizard import ThemedWizard as Wizard
 from device import Device, Simulator as DeviceSimulator
 import export
 
