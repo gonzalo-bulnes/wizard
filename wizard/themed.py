@@ -14,19 +14,19 @@ class ThemedWizard(Wizard):
         self.setOption(Wizard.CancelButtonOnLeft)
 
         button = PushButton(PushButton.TypeContained)
-        button.setText("Next")
+        button.setText("CONTINUE")
         self.setButton(Wizard.WizardButton.NextButton, button)
 
         button = PushButton(PushButton.TypeOutlined)
-        button.setText("Back")
+        button.setText("BACK")
         self.setButton(Wizard.WizardButton.BackButton, button)
 
         button = PushButton(PushButton.TypeText)
-        button.setText("Cancel")
+        button.setText("CANCEL")
         self.setButton(Wizard.WizardButton.CancelButton, button)
 
         button = PushButton(PushButton.TypeContained)
-        button.setText("Finish")
+        button.setText("FINISH")
         self.setButton(Wizard.WizardButton.FinishButton, button)
 
         self.setButtonLayout([
