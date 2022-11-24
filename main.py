@@ -12,6 +12,107 @@ import export
 # Magic values.
 SEPARATOR = "separator"
 
+AVATAR_SIZE = 40
+
+class UserMenu(QMenu):
+
+    def __init__(self, parent=None):
+        title = "journalist"
+        super().__init__(title, parent)
+
+        self.setStyleSheet("""
+            QMenu {
+                border: 0;
+                spacing: 0;
+            }
+        """)
+        action = self.menuAction()
+        pix = QStyle.SP_TitleBarUnshadeButton
+        icon = self.style().standardIcon(pix)
+        #action.setIcon(icon)
+        self.addAction("Logout")
+
+    def showEvent(self, event):
+        self.move(QPoint(self.pos().x() - AVATAR_SIZE, self.pos().y()))
+        super().showEvent(event)
+
+    def ignore(self):
+        pixmap = QPixmap()
+        painter = QPainter(pixmap)
+        painter.setFont(QFont("Arial"))
+        painter.drawText(QRect(), Qt.AlignCenter, "HELLO")
+
+class Avatar(QLabel):
+    def __init__(self, menu, parent=None):
+        super().__init__(parent)
+        self.menu = menu
+        self.setText("JZ")
+        self.setStyleSheet("""
+            QLabel {
+                background-color: skyblue;
+                border-radius: 20px;
+                font-size: 20;
+            }
+        """)
+        self.setAlignment(Qt.AlignCenter)
+        self.setFixedSize(QSize(AVATAR_SIZE, AVATAR_SIZE))
+
+    def mousePressEvent(self, event):
+        menu_position = self.parent().mapToGlobal(QPoint(AVATAR_SIZE, AVATAR_SIZE+3))
+        self.menu.exec(menu_position)
+
+
+ICON_SIZE = 10
+
+
+class Arrow(QLabel):
+    def __init__(self, menu, parent=None):
+        super().__init__(parent)
+        self.menu = menu
+
+        pix = QStyle.SP_TitleBarUnshadeButton
+        icon = self.style().standardIcon(pix)
+
+        self.setPixmap(icon.pixmap(QSize(ICON_SIZE, ICON_SIZE)))
+        self.setFixedSize(QSize(ICON_SIZE + 8, AVATAR_SIZE + 6))
+        self.setAlignment(Qt.AlignCenter)
+
+    def mousePressEvent(self, event):
+        menu_position = self.parent().mapToGlobal(QPoint(AVATAR_SIZE, AVATAR_SIZE+3))
+        self.menu.exec(menu_position)
+
+class UserMenuBar(QMenuBar):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        menu = UserMenu(self)
+        self.addMenu(menu)
+
+        self.setCornerWidget(Avatar(menu), Qt.TopLeftCorner)
+        self.setCornerWidget(Arrow(menu), Qt.TopRightCorner)
+
+        self.setStyleSheet("""
+            QMenuBar {
+                border: 1px solid skyblue;
+                spacing: 0;
+                padding: 0 4px 0 4px;
+                border-radius: 24px;
+            }
+            QMenuBar::item {
+                font-size: 24px; /* FIXME: doesn't have any effect */
+                padding: 12px 0 12px 8px;
+                border: 0;
+            }
+            QMenuBar::item:selected {
+                border: 0;
+            }
+            QMenuBar::item:pressed {
+                border: 0;
+            }
+        """)
+
+        self.setSizePolicy(QSizePolicy())
 
 class Main(QMainWindow):
     """The application main window."""
@@ -42,6 +143,8 @@ class Main(QMainWindow):
         wizard_launcher = QWidget()
         wizard = Wizard(device, export_service)
 
+        user_menu_bar = UserMenuBar()
+        layout.addWidget(user_menu_bar)
         layout.addWidget(wizard_launcher)
         layout.addWidget(device_simulator)
         layout.addWidget(export_simulator)
@@ -69,6 +172,7 @@ class Main(QMainWindow):
         self.wizard = wizard
         self.device = device
         self.device_simulator = device_simulator
+        self.user_menu_bar = user_menu_bar
 
         
     def on_wizard_started(self):
